@@ -247,6 +247,7 @@
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Maintenance"><i class="bi bi-gear me-2"></i>Config</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Generate"><i class="bi bi-file-earmark-arrow-down me-2"></i>Generate</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Upload"><i class="bi bi-file-earmark-arrow-up me-2"></i>Upload</a></li>
+                        <li class="nav-item"><a class="nav-link text-primary" runat="server" href="~/Query"><i class="bi bi-terminal me-2"></i>Query</a></li>
                         <li>
                             <div class="theme-toggle shadow-sm" onclick="toggleTheme()">
                                 <i id="theme-icon" class="bi bi-sun-fill"></i>
