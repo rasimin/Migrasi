@@ -3,74 +3,49 @@
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
     <main>
-        <div class="row mt-4">
-            <div class="col-12">
-                    <div class="card shadow-sm border-0 rounded-3">
-                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
-                            <h4 class="mb-0">Product Data Preview</h4>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2 fw-bold">Select Config:</span>
-                                <asp:DropDownList ID="ddlConfig" runat="server" CssClass="form-select form-select-sm me-3" style="width: 250px;" DataTextField="FileGenerate" DataValueField="NamaSPGenerate">
-                                </asp:DropDownList>
-                                <asp:Button ID="btnPreview" runat="server" Text="Preview Data" CssClass="btn btn-light btn-sm me-2 shadow-sm" OnClick="btnPreview_Click" />
-                                <asp:Button ID="btnGenerate" runat="server" Text="Generate to TXT" CssClass="btn btn-outline-light btn-sm shadow-sm me-3" OnClick="btnGenerate_Click" />
-                                <asp:Label ID="lblTotal" runat="server" CssClass="badge bg-warning text-dark fw-bold p-2" Text="Total Records: 0" Visible="false"></asp:Label>
+        <section class="py-5 text-center container">
+            <div class="row py-lg-5">
+                <div class="col-lg-8 col-md-10 mx-auto">
+                    <h1 class="fw-bold text-primary mb-4">Migration Application</h1>
+                    <p class="lead text-muted mb-5">
+                        Selamat datang di aplikasi migrasi data. Aplikasi ini dirancang untuk mempermudah proses 
+                        pemindahan data antar sistem melalui format file TXT yang terstandarisasi.
+                    </p>
+                    <div class="row g-4 mt-2">
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 shadow-sm p-3">
+                                <div class="card-body text-center">
+                                    <div class="h1 mb-3 text-primary"><i class="bi bi-gear-fill"></i></div>
+                                    <h5 class="fw-bold">1. Maintenance</h5>
+                                    <p class="small text-secondary">Konfigurasi pemetaan File dan Stored Procedure untuk Generate & Upload.</p>
+                                    <a href="Maintenance" class="btn btn-outline-primary btn-sm rounded-pill px-4">Go to Menu</a>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive" style="overflow-x: auto; border-bottom: 1px solid #dee2e6;">
-                                <asp:GridView ID="gvProducts" runat="server" CssClass="table table-hover table-striped mb-0" 
-                                    AllowPaging="True" PageSize="10" OnPageIndexChanging="gvProducts_PageIndexChanging"
-                                    AutoGenerateColumns="true" GridLines="None">
-                                    <PagerSettings Visible="false" />
-                                    <HeaderStyle CssClass="table-dark" />
-                                </asp:GridView>
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 shadow-sm p-3">
+                                <div class="card-body text-center">
+                                    <div class="h1 mb-3 text-success"><i class="bi bi-file-earmark-arrow-down-fill"></i></div>
+                                    <h5 class="fw-bold">2. Generate</h5>
+                                    <p class="small text-secondary">Tarik data dari database dan simpan ke dalam format file TXT yang aman.</p>
+                                    <a href="Generate" class="btn btn-outline-success btn-sm rounded-pill px-4">Go to Menu</a>
+                                </div>
                             </div>
-                            <div class="custom-pagination py-3 d-flex justify-content-center">
-                                <asp:Repeater ID="rptPager" runat="server" OnItemCommand="rptPager_ItemCommand">
-                                    <ItemTemplate>
-                                        <asp:LinkButton ID="lnkPage" runat="server" 
-                                            Text='<%# Container.DataItem %>' 
-                                            CommandArgument='<%# Container.DataItem %>' 
-                                            CssClass='<%# (int)Container.DataItem - 1 == gvProducts.PageIndex ? "active-page" : "" %>'
-                                            Enabled='<%# (int)Container.DataItem - 1 != gvProducts.PageIndex %>'>
-                                        </asp:LinkButton>
-                                    </ItemTemplate>
-                                </asp:Repeater>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 shadow-sm p-3">
+                                <div class="card-body text-center">
+                                    <div class="h1 mb-3 text-info"><i class="bi bi-file-earmark-arrow-up-fill"></i></div>
+                                    <h5 class="fw-bold">3. Upload</h5>
+                                    <p class="small text-secondary">Proses balik file TXT ke dalam database menggunakan pemetaan SP Upload.</p>
+                                    <a href="Upload" class="btn btn-outline-info btn-sm rounded-pill px-4">Go to Menu</a>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
             </div>
-        </div>
+        </section>
     </main>
-
-    <style>
-        .custom-pagination a {
-            display: block;
-            padding: 6px 12px;
-            text-decoration: none;
-            background-color: #fff;
-            border: 1px solid #dee2e6;
-            color: #0d6efd;
-            border-radius: 4px;
-            margin: 0 3px;
-            font-size: 14px;
-            min-width: 35px;
-            text-align: center;
-        }
-        .custom-pagination .active-page {
-            background-color: #0d6efd !important;
-            color: #fff !important;
-            border-color: #0d6efd !important;
-            cursor: default;
-        }
-        .custom-pagination a:hover:not(.active-page) {
-            background-color: #e9ecef;
-        }
-        .card-header h4 {
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-    </style>
 
 </asp:Content>
