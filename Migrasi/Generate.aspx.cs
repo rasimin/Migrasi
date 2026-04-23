@@ -42,7 +42,7 @@ namespace Migrasi
         {
             if (ddlConfig.SelectedIndex == 0)
             {
-                Response.Write("<script>alert('Please select a configuration first.');</script>");
+                ClientScript.RegisterStartupScript(this.GetType(), "alert", "showAlert('Wait', 'Please select a configuration first.', 'warning');", true);
                 return;
             }
             BindGrid();
@@ -110,7 +110,7 @@ namespace Migrasi
                         }
                         catch (Exception ex)
                         {
-                            Response.Write("<script>alert('Error: " + ex.Message.Replace("'", "\\'") + "');</script>");
+                            ClientScript.RegisterStartupScript(this.GetType(), "alert", "showAlert('Database Error', '" + ex.Message.Replace("'", "\\'") + "', 'error');", true);
                             return null;
                         }
                     }
@@ -122,7 +122,7 @@ namespace Migrasi
         {
             if (ddlConfig.SelectedIndex == 0)
             {
-                Response.Write("<script>alert('Please select a configuration first.');</script>");
+                ClientScript.RegisterStartupScript(this.GetType(), "alert", "showAlert('Wait', 'Please select a configuration first.', 'warning');", true);
                 return;
             }
 
@@ -181,7 +181,7 @@ namespace Migrasi
             }
             else
             {
-                Response.Write("<script>alert('No data found to generate.');</script>");
+                ClientScript.RegisterStartupScript(this.GetType(), "alert", "showAlert('Information', 'No data found to generate.', 'info');", true);
             }
         }
     }

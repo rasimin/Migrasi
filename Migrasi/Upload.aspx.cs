@@ -40,8 +40,8 @@ namespace Migrasi
 
         protected void btnPreview_Click(object sender, EventArgs e)
         {
-            if (ddlConfig.SelectedIndex == 0) { ShowAlert("Please select a configuration first."); return; }
-            if (!fileUpload.HasFile) { ShowAlert("Please choose a file to upload."); return; }
+            if (ddlConfig.SelectedIndex == 0) { ShowAlert("Please select a configuration first.", "warning"); return; }
+            if (!fileUpload.HasFile) { ShowAlert("Please choose a file to upload.", "warning"); return; }
 
             try
             {
@@ -61,7 +61,7 @@ namespace Migrasi
             }
             catch (Exception ex)
             {
-                ShowAlert("Error reading file: " + ex.Message);
+                ShowAlert("Error reading file: " + ex.Message, "error");
             }
         }
 
@@ -138,7 +138,7 @@ namespace Migrasi
             string resultMsg = $"Upload Finished.\\nSuccess: {successCount}\\nFailed: {errorCount}";
             if (errorCount > 0) resultMsg += "\\nLast Error: " + lastError.Replace("'", "");
             
-            ShowAlert(resultMsg);
+            ShowAlert(resultMsg, errorCount > 0 ? "warning" : "success");
             
             if (errorCount == 0)
             {
@@ -147,9 +147,10 @@ namespace Migrasi
             }
         }
 
-        private void ShowAlert(string msg)
+        private void ShowAlert(string msg, string type = "info")
         {
-            ScriptManager.RegisterStartupScript(this, GetType(), "alert", $"alert('{msg}');", true);
+            string title = type == "error" ? "Error" : (type == "success" ? "Success" : "Information");
+            ScriptManager.RegisterStartupScript(this, GetType(), "alert", $"showAlert('{title}', '{msg.Replace("'", "\\'")}', '{type}');", true);
         }
     }
 }

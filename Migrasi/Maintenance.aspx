@@ -4,32 +4,34 @@
     <main>
         <div class="row mt-4">
             <div class="col-12">
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
-                        <h4 class="mb-0">Maintenance Generate</h4>
-                        <button type="button" class="btn btn-primary btn-sm shadow-sm" onclick="resetAndShow()">
-                            Add New Config
+                <div class="card card-modern">
+                    <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1 fw-bold text-dark">Data Configuration</h4>
+                            <p class="text-secondary small mb-0">Manage your file mappings and stored procedures</p>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-modern shadow-sm" onclick="resetAndShow()">
+                            <i class="bi bi-plus-lg me-2 text-white"></i>New Config
                         </button>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <asp:GridView ID="gvMaintenance" runat="server" CssClass="table table-hover table-striped mb-0" 
+                            <asp:GridView ID="gvMaintenance" runat="server" CssClass="table table-hover table-modern mb-0" 
                                 AutoGenerateColumns="False" DataKeyNames="ID" OnRowDeleting="gvMaintenance_RowDeleting" 
                                 OnRowEditing="gvMaintenance_RowEditing" GridLines="None">
                                 <Columns>
-                                    <asp:BoundField DataField="ID" HeaderText="ID" ReadOnly="True" ItemStyle-CssClass="px-3" HeaderStyle-CssClass="px-3" />
-                                    <asp:BoundField DataField="FileGenerate" HeaderText="File Name" />
-                                    <asp:BoundField DataField="NamaSPGenerate" HeaderText="SP Generate" />
-                                    <asp:BoundField DataField="NamaSPUpload" HeaderText="SP Upload" />
-                                    <asp:BoundField DataField="CreatedAt" HeaderText="Created At" DataFormatString="{0:yyyy-MM-dd HH:mm}" />
-                                    <asp:TemplateField HeaderText="Actions">
+                                    <asp:BoundField DataField="ID" HeaderText="ID" ReadOnly="True" ItemStyle-CssClass="px-4 py-3 text-secondary small" HeaderStyle-CssClass="px-4" />
+                                    <asp:BoundField DataField="FileGenerate" HeaderText="File Name" ItemStyle-CssClass="py-3 fw-500" />
+                                    <asp:BoundField DataField="NamaSPGenerate" HeaderText="SP Generate" ItemStyle-CssClass="py-3 font-monospace text-primary small" />
+                                    <asp:BoundField DataField="NamaSPUpload" HeaderText="SP Upload" ItemStyle-CssClass="py-3 font-monospace text-info small" />
+                                    <asp:BoundField DataField="CreatedAt" HeaderText="Created At" DataFormatString="{0:yyyy-MM-dd}" ItemStyle-CssClass="py-3 text-secondary small" />
+                                            <asp:TemplateField HeaderText="Actions" HeaderStyle-CssClass="text-end px-4" ItemStyle-CssClass="text-end px-4 py-3">
                                         <ItemTemplate>
-                                            <asp:LinkButton ID="btnEdit" runat="server" CommandName="Edit" CssClass="btn btn-warning btn-sm me-1">Edit</asp:LinkButton>
-                                            <asp:LinkButton ID="btnDelete" runat="server" CommandName="Delete" CssClass="btn btn-danger btn-sm" OnClientClick="return confirm('Delete this record?');">Delete</asp:LinkButton>
+                                            <asp:LinkButton ID="btnEdit" runat="server" CommandName="Edit" CssClass="btn btn-light btn-sm text-warning me-1"><i class="bi bi-pencil-square"></i></asp:LinkButton>
+                                            <asp:LinkButton ID="btnDelete" runat="server" CommandName="Delete" CssClass="btn btn-light btn-sm text-danger" OnClientClick="return confirmDelete(this, 'Delete this configuration?');"><i class="bi bi-trash"></i></asp:LinkButton>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                 </Columns>
-                                <HeaderStyle CssClass="table-dark" />
                             </asp:GridView>
                         </div>
                     </div>
@@ -39,30 +41,30 @@
 
         <!-- Modal -->
         <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="addModalLabel">Add New Configuration</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                    <div class="modal-header border-0 pt-4 px-4">
+                        <h5 class="modal-title fw-bold text-dark" id="addModalLabel">Configuration Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body px-4 pb-4">
                         <asp:HiddenField ID="hfID" runat="server" Value="0" />
                         <div class="mb-3">
-                            <label class="form-label fw-bold">File Name</label>
-                            <asp:TextBox ID="txtFileName" runat="server" CssClass="form-control" placeholder="example: output.txt"></asp:TextBox>
+                            <label class="form-label text-secondary small fw-bold">FILE NAME</label>
+                            <asp:TextBox ID="txtFileName" runat="server" CssClass="form-control form-control-lg fs-6" placeholder="e.g., product_data.txt"></asp:TextBox>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Stored Procedure (Generate)</label>
-                            <asp:TextBox ID="txtSPName" runat="server" CssClass="form-control" placeholder="example: usp_GetData"></asp:TextBox>
+                            <label class="form-label text-secondary small fw-bold">SP GENERATE (READ)</label>
+                            <asp:TextBox ID="txtSPName" runat="server" CssClass="form-control form-control-lg fs-6 font-monospace" placeholder="usp_GetProducts"></asp:TextBox>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Stored Procedure (Upload)</label>
-                            <asp:TextBox ID="txtSPUpload" runat="server" CssClass="form-control" placeholder="example: usp_SaveData"></asp:TextBox>
+                            <label class="form-label text-secondary small fw-bold">SP UPLOAD (WRITE)</label>
+                            <asp:TextBox ID="txtSPUpload" runat="server" CssClass="form-control form-control-lg fs-6 font-monospace" placeholder="usp_InsertProduct"></asp:TextBox>
                         </div>
                     </div>
-                    <div class="modal-footer bg-light">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <asp:Button ID="btnSave" runat="server" Text="Save Changes" CssClass="btn btn-primary" OnClick="btnSave_Click" />
+                    <div class="modal-footer border-0 px-4 pb-4">
+                        <button type="button" class="btn btn-light btn-modern text-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <asp:Button ID="btnSave" runat="server" Text="Save Configuration" CssClass="btn btn-primary btn-modern" OnClick="btnSave_Click" />
                     </div>
                 </div>
             </div>

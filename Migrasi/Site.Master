@@ -14,7 +14,204 @@
 
     <webopt:bundlereference runat="server" path="~/Content/css" />
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src='<%= ResolveUrl("~/Scripts/bootstrap.bundle.min.js") %>'></script>
+
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-header: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: rgba(0,0,0,0.05);
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --table-header: #f1f5f9;
+            --primary-blue: #0284c7;
+            --btn-light-bg: #f1f5f9;
+        }
+
+        [data-bs-theme="dark"] {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-header: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255,255,255,0.1);
+            --nav-bg: rgba(15, 23, 42, 0.8);
+            --table-header: #334155;
+            --btn-light-bg: #334155;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .navbar {
+            background: var(--nav-bg) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-main) !important;
+            display: flex;
+            align-items: center;
+        }
+        .nav-link {
+            font-weight: 500;
+            color: var(--text-muted) !important;
+            padding: 0.5rem 1.2rem !important;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .nav-link:hover {
+            color: var(--primary-blue) !important;
+        }
+        .btn-modern {
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .card-modern {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            background: var(--bg-card);
+            transition: background-color 0.3s;
+        }
+        .table-modern thead {
+            background-color: var(--table-header);
+        }
+        .table-modern th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-color);
+        }
+        .table-modern td {
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .text-dark { color: var(--text-main) !important; }
+        .text-secondary { color: var(--text-muted) !important; }
+        .bg-light { background-color: var(--table-header) !important; }
+        
+        .theme-toggle {
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: var(--table-header);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            margin-left: 15px;
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover {
+            border-color: var(--primary-blue);
+        }
+
+        .card-modern .card-header {
+            background-color: var(--bg-header) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+        .btn-light {
+            background-color: var(--btn-light-bg) !important;
+            border: none !important;
+            color: var(--text-main) !important;
+        }
+        .btn-light.text-warning:hover { color: #f59e0b !important; }
+        .btn-light.text-danger:hover { color: #ef4444 !important; }
+
+        /* SweetAlert Customization */
+        .swal2-popup {
+            background: var(--bg-card) !important;
+            color: var(--text-main) !important;
+            border-radius: 20px !important;
+        }
+        .swal2-title, .swal2-html-container {
+            color: var(--text-main) !important;
+        }
+    </style>
+    <script>
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('theme', theme);
+            const icon = document.getElementById('theme-icon');
+            if (icon) {
+                icon.className = theme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            setTheme(currentTheme === 'light' ? 'dark' : 'light');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+        });
+
+        // Helper function for Modern Alert
+        window.showAlert = function(title, text, icon = 'info') {
+            Swal.fire({
+                title: title,
+                text: text,
+                icon: icon,
+                confirmButtonColor: '#0284c7',
+                confirmButtonText: 'OK',
+                customClass: {
+                    confirmButton: 'btn btn-primary btn-modern px-4 shadow-sm'
+                },
+                buttonsStyling: false
+            });
+        };
+
+        window.confirmDelete = function(sender, message) {
+            if ($(sender).attr("data-confirmed") == "true") { return true; }
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: message || "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    confirmButton: 'btn btn-danger btn-modern px-4 me-2 shadow-sm',
+                    cancelButton: 'btn btn-light btn-modern px-4 shadow-sm'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $(sender).attr("data-confirmed", "true");
+                    sender.click();
+                }
+            });
+
+            return false;
+        };
+    </script>
 </head>
 <body>
     <form runat="server">
@@ -37,21 +234,24 @@
             </Scripts>
         </asp:ScriptManager>
 
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm sticky-top">
             <div class="container">
-                <a class="navbar-brand" runat="server" href="~/">Application name</a>
+                <a class="navbar-brand" runat="server" href="~/"><i class="bi bi-rocket-takeoff-fill text-primary me-2"></i>MIGRASI PRO</a>
                 <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Toggle navigation" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Maintenance">Maintenance</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Generate">Generate</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Upload">Upload</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/About">About</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Contact">Contact</a></li>
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        <li class="nav-item"><a class="nav-link" runat="server" href="~/"><i class="bi bi-house-door me-2"></i>Home</a></li>
+                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Maintenance"><i class="bi bi-gear me-2"></i>Config</a></li>
+                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Generate"><i class="bi bi-file-earmark-arrow-down me-2"></i>Generate</a></li>
+                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Upload"><i class="bi bi-file-earmark-arrow-up me-2"></i>Upload</a></li>
+                        <li>
+                            <div class="theme-toggle shadow-sm" onclick="toggleTheme()">
+                                <i id="theme-icon" class="bi bi-sun-fill"></i>
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -59,9 +259,12 @@
         <div class="container body-content">
             <asp:ContentPlaceHolder ID="MainContent" runat="server">
             </asp:ContentPlaceHolder>
-            <hr />
-            <footer>
-                <p>&copy; <%: DateTime.Now.Year %> - My ASP.NET Application</p>
+            <hr class="mt-5 opacity-25" />
+            <footer class="py-4">
+                <div class="d-flex justify-content-between align-items-center text-secondary small">
+                    <p class="mb-0">&copy; <%: DateTime.Now.Year %> - Migration Expert Application</p>
+                    <div>Version 2.0 (Premium)</div>
+                </div>
             </footer>
         </div>
     </form>

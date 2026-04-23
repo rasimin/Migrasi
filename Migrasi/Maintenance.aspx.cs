@@ -49,7 +49,7 @@ namespace Migrasi
 
             if (string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(spName))
             {
-                ScriptManager.RegisterStartupScript(this, GetType(), "alert", "alert('Please fill all fields');", true);
+                ScriptManager.RegisterStartupScript(this, GetType(), "alert", "showAlert('Wait', 'Please fill all fields', 'warning');", true);
                 return;
             }
 
@@ -76,7 +76,7 @@ namespace Migrasi
 
             ResetForm();
             BindGrid();
-            ScriptManager.RegisterStartupScript(this, GetType(), "alert", "alert('Data saved successfully');", true);
+            ScriptManager.RegisterStartupScript(this, GetType(), "alert", "showAlert('Success', 'Data saved successfully', 'success');", true);
         }
 
         protected void gvMaintenance_RowEditing(object sender, GridViewEditEventArgs e)

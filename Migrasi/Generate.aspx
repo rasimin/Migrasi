@@ -4,25 +4,32 @@
     <main>
         <div class="row mt-4">
             <div class="col-12">
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
-                        <h4 class="mb-0">Product Data Preview</h4>
-                        <div class="d-flex align-items-center">
-                            <span class="me-2 fw-bold">Select Config:</span>
-                            <asp:DropDownList ID="ddlConfig" runat="server" CssClass="form-select form-select-sm me-3" style="width: 250px;" DataTextField="FileGenerate" DataValueField="NamaSPGenerate">
-                            </asp:DropDownList>
-                            <asp:Button ID="btnPreview" runat="server" Text="Preview Data" CssClass="btn btn-light btn-sm me-2 shadow-sm" OnClick="btnPreview_Click" />
-                            <asp:Button ID="btnGenerate" runat="server" Text="Generate to TXT" CssClass="btn btn-outline-light btn-sm shadow-sm me-3" OnClick="btnGenerate_Click" />
-                            <asp:Label ID="lblTotal" runat="server" CssClass="badge bg-warning text-dark fw-bold p-2" Text="Total Records: 0" Visible="false"></asp:Label>
+                <div class="card card-modern">
+                    <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1 fw-bold text-dark">Data Generation</h4>
+                            <p class="text-secondary small mb-0">Export data to standardized TXT format</p>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="d-flex align-items-center bg-light p-1 rounded-3 border">
+                                <span class="small fw-bold text-secondary px-3">CONFIG</span>
+                                <asp:DropDownList ID="ddlConfig" runat="server" CssClass="form-select form-select-sm border-0 bg-white shadow-sm fw-500" style="width: 250px; border-radius: 6px;" DataTextField="FileGenerate" DataValueField="NamaSPGenerate">
+                                </asp:DropDownList>
+                            </div>
+                            <asp:Button ID="btnPreview" runat="server" Text="Preview Data" CssClass="btn btn-light btn-modern btn-sm border shadow-sm px-3" OnClick="btnPreview_Click" />
+                            <asp:Button ID="btnGenerate" runat="server" Text="Generate TXT" CssClass="btn btn-primary btn-modern btn-sm py-2 shadow-sm px-4" OnClick="btnGenerate_Click" />
                         </div>
                     </div>
                     <div class="card-body p-0">
-                        <div class="table-responsive" style="overflow-x: auto; border-bottom: 1px solid #dee2e6;">
-                            <asp:GridView ID="gvProducts" runat="server" CssClass="table table-hover table-striped mb-0" 
+                        <div class="px-4 py-2 border-bottom d-flex justify-content-between align-items-center" style="background-color: var(--bg-header);">
+                            <span class="text-secondary small">Data Preview Area</span>
+                            <asp:Label ID="lblTotal" runat="server" CssClass="badge rounded-pill text-primary fw-bold px-3 py-2" style="background-color: var(--table-header);" Text="0 Records Found" Visible="false"></asp:Label>
+                        </div>
+                        <div class="table-responsive" style="overflow-x: auto;">
+                            <asp:GridView ID="gvProducts" runat="server" CssClass="table table-hover table-modern mb-0" 
                                 AllowPaging="True" PageSize="10" OnPageIndexChanging="gvProducts_PageIndexChanging"
                                 AutoGenerateColumns="true" GridLines="None">
                                 <PagerSettings Visible="false" />
-                                <HeaderStyle CssClass="table-dark" />
                             </asp:GridView>
                         </div>
                         <div class="custom-pagination py-3 d-flex justify-content-center">
