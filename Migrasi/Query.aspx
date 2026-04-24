@@ -1,4 +1,4 @@
-<%@ Page Title="Query Runner" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Query.aspx.cs" Inherits="Migrasi.Query" %>
+<%@ Page Title="Query Runner" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Query.aspx.cs" Inherits="Migrasi.Query" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <div class="container-fluid py-4">

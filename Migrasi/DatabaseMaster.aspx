@@ -1,4 +1,4 @@
-<%@ Page Title="Database Master" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="DatabaseMaster.aspx.cs" Inherits="Migrasi.DatabaseMaster" %>
+<%@ Page Title="Database Master" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="DatabaseMaster.aspx.cs" Inherits="Migrasi.DatabaseMaster" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <div class="container-fluid py-4">

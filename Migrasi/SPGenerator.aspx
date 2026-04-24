@@ -1,4 +1,4 @@
-<%@ Page Title="SP Generator" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="SPGenerator.aspx.cs" Inherits="Migrasi.SPGenerator" %>
+<%@ Page Title="SP Generator" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="SPGenerator.aspx.cs" Inherits="Migrasi.SPGenerator" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <main>

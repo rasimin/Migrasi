@@ -1,4 +1,4 @@
-<%@ Page Title="Mapping Padanan" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Mapping.aspx.cs" Inherits="Migrasi.Mapping" %>
+<%@ Page Title="Mapping Padanan" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Mapping.aspx.cs" Inherits="Migrasi.Mapping" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <div class="container py-4">
