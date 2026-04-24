@@ -14,6 +14,18 @@
 
     <webopt:bundlereference runat="server" path="~/Content/css" />
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+
+    <!-- Anti-Flicker Theme Script: Runs before any content is rendered -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            // Apply background color immediately to avoid white flash
+            const bgColor = savedTheme === 'dark' ? '#0f172a' : '#f8fafc';
+            document.write('<style>body { background-color: ' + bgColor + '; }</style>');
+        })();
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -247,6 +259,7 @@
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Maintenance"><i class="bi bi-gear me-2"></i>Config</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Generate"><i class="bi bi-file-earmark-arrow-down me-2"></i>Generate</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Upload"><i class="bi bi-file-earmark-arrow-up me-2"></i>Upload</a></li>
+                        <li class="nav-item"><a class="nav-link text-success" runat="server" href="~/Mapping"><i class="bi bi-intersect me-2"></i>Mapping</a></li>
                         <li class="nav-item"><a class="nav-link text-primary" runat="server" href="~/Query"><i class="bi bi-terminal me-2"></i>Query</a></li>
                         <li>
                             <div class="theme-toggle shadow-sm" onclick="toggleTheme()">

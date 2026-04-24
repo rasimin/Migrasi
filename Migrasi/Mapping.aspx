@@ -1,0 +1,107 @@
+<%@ Page Title="Mapping Padanan" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Mapping.aspx.cs" Inherits="Migrasi.Mapping" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
+    <div class="container py-4">
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card card-modern">
+                    <div class="card-header border-0 py-4 px-4 d-flex justify-content-between align-items-center" style="background-color: var(--bg-header);">
+                        <div>
+                            <h4 class="mb-1 fw-bold text-dark">Mapping Padanan</h4>
+                            <p class="text-secondary small mb-0">Manage code transformations and data mapping</p>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-modern shadow-sm px-4" onclick="showAddModal()">
+                            <i class="bi bi-plus-lg me-2"></i>Add New Mapping
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <asp:GridView ID="gvMapping" runat="server" AutoGenerateColumns="False" 
+                                CssClass="table table-hover table-modern mb-0" GridLines="None" 
+                                OnRowCommand="gvMapping_RowCommand" DataKeyNames="id">
+                                <Columns>
+                                    <asp:BoundField DataField="id" HeaderText="ID" ItemStyle-CssClass="ps-4 fw-bold text-secondary" HeaderStyle-CssClass="ps-4" />
+                                    <asp:TemplateField HeaderText="MAPPING KEY">
+                                        <ItemTemplate>
+                                            <span class="badge bg-light text-primary fw-bold px-3 py-2"><%# Eval("MappingKey") %></span>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:BoundField DataField="FromCode" HeaderText="FROM CODE" />
+                                    <asp:BoundField DataField="ToCode" HeaderText="TO CODE" />
+                                    <asp:TemplateField HeaderText="ACTIONS" ItemStyle-CssClass="text-end pe-4" HeaderStyle-CssClass="text-end pe-4">
+                                        <ItemTemplate>
+                                            <div class="btn-group shadow-sm rounded-3 overflow-hidden">
+                                                <asp:LinkButton ID="btnEdit" runat="server" CommandName="EditMapping" CommandArgument='<%# Eval("id") %>' CssClass="btn btn-white btn-sm px-3" ToolTip="Edit">
+                                                    <i class="bi bi-pencil-square text-warning"></i>
+                                                </asp:LinkButton>
+                                                <asp:LinkButton ID="btnDelete" runat="server" OnClientClick='<%# "return confirmDelete(this, \"Are you sure you want to delete mapping for " + Eval("FromCode") + "?\");" %>' 
+                                                    CommandName="DeleteMapping" CommandArgument='<%# Eval("id") %>' CssClass="btn btn-white btn-sm px-3" ToolTip="Delete">
+                                                    <i class="bi bi-trash3 text-danger"></i>
+                                                </asp:LinkButton>
+                                            </div>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                                <EmptyDataTemplate>
+                                    <div class="text-center py-5">
+                                        <i class="bi bi-folder2-open display-1 text-light"></i>
+                                        <p class="text-secondary mt-3">No mapping records found.</p>
+                                    </div>
+                                </EmptyDataTemplate>
+                            </asp:GridView>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Add/Edit -->
+    <div class="modal fade" id="mappingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header border-0 py-3 px-4" style="background-color: var(--primary-blue);">
+                    <h5 class="modal-title text-white fw-bold"><i class="bi bi-intersect me-2"></i><span id="modalTitle">Add New Mapping</span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" style="background-color: var(--bg-card);">
+                    <asp:HiddenField ID="hfMappingId" runat="server" />
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">MAPPING KEY</label>
+                        <asp:TextBox ID="txtMappingKey" runat="server" CssClass="form-control form-control-lg fs-6" placeholder="e.g. PRODUCT_CATEGORY"></asp:TextBox>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-secondary small fw-bold">FROM CODE</label>
+                            <asp:TextBox ID="txtFromCode" runat="server" CssClass="form-control form-control-lg fs-6" placeholder="Old Code"></asp:TextBox>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-secondary small fw-bold">TO CODE</label>
+                            <asp:TextBox ID="txtToCode" runat="server" CssClass="form-control form-control-lg fs-6" placeholder="New Code"></asp:TextBox>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0" style="background-color: var(--bg-card);">
+                    <button type="button" class="btn btn-light btn-modern px-4" data-bs-dismiss="modal">Cancel</button>
+                    <asp:Button ID="btnSave" runat="server" Text="Save Mapping" CssClass="btn btn-primary btn-modern px-4 shadow-sm" OnClick="btnSave_Click" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showAddModal() {
+            document.getElementById('modalTitle').innerText = 'Add New Mapping';
+            document.getElementById('<%= hfMappingId.ClientID %>').value = '';
+            document.getElementById('<%= txtMappingKey.ClientID %>').value = '';
+            document.getElementById('<%= txtFromCode.ClientID %>').value = '';
+            document.getElementById('<%= txtToCode.ClientID %>').value = '';
+            new bootstrap.Modal(document.getElementById('mappingModal')).show();
+        }
+
+        function showEditModal() {
+            document.getElementById('modalTitle').innerText = 'Edit Mapping';
+            new bootstrap.Modal(document.getElementById('mappingModal')).show();
+        }
+    </script>
+</asp:Content>
