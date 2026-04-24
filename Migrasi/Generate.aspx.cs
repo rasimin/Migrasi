@@ -153,6 +153,11 @@ namespace Migrasi
                             // Standard ISO Date format for reliable upload
                             fieldString = ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss");
                         }
+                        else if (value is bool)
+                        {
+                            // Output boolean as 1 or 0 instead of True/False for safer SQL parsing
+                            fieldString = ((bool)value) ? "1" : "0";
+                        }
                         else
                         {
                             fieldString = value.ToString();
@@ -173,6 +178,8 @@ namespace Migrasi
                 Response.Clear();
                 Response.Buffer = true;
                 Response.AddHeader("content-disposition", "attachment;filename=" + selectedFileName);
+                // Set a cookie so the client knows the download has finished
+                Response.Cookies.Add(new HttpCookie("fileDownload", "true") { Path = "/" });
                 Response.Charset = "";
                 Response.ContentType = "application/text";
                 Response.Output.Write(sb.ToString());

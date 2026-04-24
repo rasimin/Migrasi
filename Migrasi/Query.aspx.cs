@@ -17,6 +17,61 @@ namespace Migrasi
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!IsPostBack)
+            {
+                LoadDatabases();
+            }
+        }
+
+        private void LoadDatabases()
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    // Query untuk menarik daftar database yang aktif (tidak offline/restoring)
+                    string query = "SELECT name FROM sys.databases WHERE state_desc = 'ONLINE' ORDER BY name";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        conn.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            ddlDatabase.DataSource = reader;
+                            ddlDatabase.DataTextField = "name";
+                            ddlDatabase.DataValueField = "name";
+                            ddlDatabase.DataBind();
+                        }
+                    }
+                    
+                    // Set dropdown ke database bawaan dari connection string
+                    string defaultDb = conn.Database;
+                    if (ddlDatabase.Items.FindByValue(defaultDb) != null)
+                    {
+                        ddlDatabase.SelectedValue = defaultDb;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Fallback: Jika user tidak punya izin (VIEW ANY DATABASE) untuk membaca sys.databases,
+                // tangkap errornya diam-diam dan cukup tampilkan 1 database bawaan dari connection string.
+                try
+                {
+                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connString);
+                    string defaultDb = builder.InitialCatalog;
+                    
+                    ddlDatabase.Items.Clear();
+                    if (!string.IsNullOrEmpty(defaultDb))
+                    {
+                        ddlDatabase.Items.Add(new ListItem(defaultDb, defaultDb));
+                        ddlDatabase.SelectedValue = defaultDb;
+                    }
+                }
+                catch
+                {
+                    // Ignore ultimate fallback error
+                }
+            }
         }
 
         protected void btnExecute_Click(object sender, EventArgs e)
@@ -40,9 +95,17 @@ namespace Migrasi
                         sqlOutput.AppendLine(ev.Message);
                     };
 
+                    conn.Open(); // Buka koneksi terlebih dahulu
+
+                    // Ganti fokus database sesuai dengan pilihan dropdown
+                    string selectedDb = ddlDatabase.SelectedValue;
+                    if (!string.IsNullOrEmpty(selectedDb) && !selectedDb.Equals(conn.Database, StringComparison.OrdinalIgnoreCase))
+                    {
+                        conn.ChangeDatabase(selectedDb);
+                    }
+
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
-                        conn.Open();
                         
                         using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
                         {

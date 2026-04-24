@@ -17,7 +17,7 @@
                                 </asp:DropDownList>
                             </div>
                             <asp:Button ID="btnPreview" runat="server" Text="Preview Data" CssClass="btn btn-light btn-modern btn-sm border shadow-sm px-3" OnClick="btnPreview_Click" />
-                            <asp:Button ID="btnGenerate" runat="server" Text="Generate TXT" CssClass="btn btn-primary btn-modern btn-sm py-2 shadow-sm px-4" OnClick="btnGenerate_Click" />
+                            <asp:Button ID="btnGenerate" runat="server" Text="Generate TXT" CssClass="btn btn-primary btn-modern btn-sm py-2 shadow-sm px-4" OnClick="btnGenerate_Click" OnClientClick="showLoading('Generating Data...', 'Preparing your file for download', true);" />
                         </div>
                     </div>
                     <div class="card-body p-0">

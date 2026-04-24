@@ -14,35 +14,74 @@
                     </p>
                     
                     <div class="row g-4 mt-2">
+                        <!-- Card 1 -->
                         <div class="col-md-4">
                             <a href="Maintenance" class="text-decoration-none h-100">
                                 <div class="card card-modern h-100 p-3 transition-transform">
                                     <div class="card-body">
-                                        <div class="h1 mb-4 text-primary opacity-75"><i class="bi bi-sliders2-vertical"></i></div>
+                                        <div class="h1 mb-4 text-secondary opacity-75"><i class="bi bi-gear-fill"></i></div>
                                         <h5 class="fw-bold text-dark">Config Center</h5>
-                                        <p class="small text-secondary">Kelola pemetaan SP dan file untuk alur data yang fleksibel.</p>
+                                        <p class="small text-secondary">Kelola pemetaan SP dan file untuk alur migrasi data utama.</p>
                                     </div>
                                 </div>
                             </a>
                         </div>
+                        <!-- Card 2 -->
                         <div class="col-md-4">
                             <a href="Generate" class="text-decoration-none h-100">
                                 <div class="card card-modern h-100 p-3 transition-transform">
                                     <div class="card-body">
-                                        <div class="h1 mb-4 text-success opacity-75"><i class="bi bi-box-arrow-in-down"></i></div>
+                                        <div class="h1 mb-4 text-warning opacity-75"><i class="bi bi-file-earmark-arrow-down"></i></div>
                                         <h5 class="fw-bold text-dark">Data Generate</h5>
-                                        <p class="small text-secondary">Ekspor data ke format TXT standar dengan pembersihan otomatis.</p>
+                                        <p class="small text-secondary">Ekspor data ke format TXT standar yang siap didistribusikan.</p>
                                     </div>
                                 </div>
                             </a>
                         </div>
+                        <!-- Card 3 -->
                         <div class="col-md-4">
                             <a href="Upload" class="text-decoration-none h-100">
                                 <div class="card card-modern h-100 p-3 transition-transform">
                                     <div class="card-body">
-                                        <div class="h1 mb-4 text-info opacity-75"><i class="bi bi-box-arrow-up"></i></div>
+                                        <div class="h1 mb-4 text-primary opacity-75"><i class="bi bi-file-earmark-arrow-up"></i></div>
                                         <h5 class="fw-bold text-dark">Data Upload</h5>
-                                        <p class="small text-secondary">Unggah kembali data Anda ke sistem tujuan dengan aman.</p>
+                                        <p class="small text-secondary">Unggah TXT dan masukkan otomatis ke tabel Database via SP.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <!-- Card 4 -->
+                        <div class="col-md-4">
+                            <a href="Mapping" class="text-decoration-none h-100">
+                                <div class="card card-modern h-100 p-3 transition-transform">
+                                    <div class="card-body">
+                                        <div class="h1 mb-4 text-success opacity-75"><i class="bi bi-intersect"></i></div>
+                                        <h5 class="fw-bold text-dark">Mapping Center</h5>
+                                        <p class="small text-secondary">Maintenance tabel padanan (Mapping Key, From Code & To Code).</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <!-- Card 5 -->
+                        <div class="col-md-4">
+                            <a href="SPGenerator" class="text-decoration-none h-100">
+                                <div class="card card-modern h-100 p-3 transition-transform">
+                                    <div class="card-body">
+                                        <div class="h1 mb-4 text-info opacity-75"><i class="bi bi-code-square"></i></div>
+                                        <h5 class="fw-bold text-dark">SP Maker</h5>
+                                        <p class="small text-secondary">Auto-generate script Stored Procedure Upload dari file TXT.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <!-- Card 6 -->
+                        <div class="col-md-4">
+                            <a href="Query" class="text-decoration-none h-100">
+                                <div class="card card-modern h-100 p-3 transition-transform">
+                                    <div class="card-body">
+                                        <div class="h1 mb-4 text-danger opacity-75"><i class="bi bi-terminal"></i></div>
+                                        <h5 class="fw-bold text-dark">Query Runner</h5>
+                                        <p class="small text-secondary">Eksekusi command SQL langsung dari web tanpa butuh SSMS.</p>
                                     </div>
                                 </div>
                             </a>

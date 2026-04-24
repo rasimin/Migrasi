@@ -290,30 +290,55 @@
             });
         };
 
+        window.showLoading = function(title = 'Processing...', text = 'Please wait while we process your data', checkForDownload = false) {
+            Swal.fire({
+                title: title,
+                text: text,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            if (checkForDownload) {
+                var checkCookie = setInterval(function() {
+                    if (document.cookie.indexOf("fileDownload=true") !== -1) {
+                        clearInterval(checkCookie);
+                        document.cookie = "fileDownload=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                        Swal.close();
+                    }
+                }, 1000); // Check every 1 second
+            }
+        };
+
         window.confirmDelete = function(sender, message) {
             if ($(sender).attr("data-confirmed") == "true") { return true; }
+
+            const isDelete = (message || "").toLowerCase().includes("delete");
 
             Swal.fire({
                 title: 'Are you sure?',
                 text: message || "You won't be able to revert this!",
-                icon: 'warning',
+                icon: isDelete ? 'warning' : 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#ef4444',
+                confirmButtonColor: isDelete ? '#ef4444' : '#0284c7',
                 cancelButtonColor: '#64748b',
-                confirmButtonText: 'Yes, delete it!',
+                confirmButtonText: isDelete ? 'Yes, delete it!' : 'Yes, proceed!',
                 cancelButtonText: 'Cancel',
                 customClass: {
-                    confirmButton: 'btn btn-danger btn-modern px-4 me-2 shadow-sm',
+                    confirmButton: `btn ${isDelete ? 'btn-danger' : 'btn-primary'} btn-modern px-4 me-2 shadow-sm`,
                     cancelButton: 'btn btn-light btn-modern px-4 shadow-sm'
                 },
                 buttonsStyling: false
             }).then((result) => {
                 if (result.isConfirmed) {
+                    window.showLoading('Processing...', 'Please wait while we handle your request');
                     $(sender).attr("data-confirmed", "true");
                     sender.click();
                 }
             });
-
             return false;
         };
     </script>
@@ -353,6 +378,7 @@
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Generate"><i class="bi bi-file-earmark-arrow-down me-2"></i>Generate</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Upload"><i class="bi bi-file-earmark-arrow-up me-2"></i>Upload</a></li>
                         <li class="nav-item"><a class="nav-link text-success" runat="server" href="~/Mapping"><i class="bi bi-intersect me-2"></i>Mapping</a></li>
+                        <li class="nav-item"><a class="nav-link text-info" runat="server" href="~/SPGenerator"><i class="bi bi-code-square me-2"></i>SP Maker</a></li>
                         <li class="nav-item"><a class="nav-link text-primary" runat="server" href="~/Query"><i class="bi bi-terminal me-2"></i>Query</a></li>
                         <li>
                             <div class="theme-toggle shadow-sm" onclick="toggleTheme()">
