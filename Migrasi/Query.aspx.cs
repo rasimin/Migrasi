@@ -106,6 +106,8 @@ namespace Migrasi
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
+                        // Batasi waktu eksekusi maksimal 3 menit (180 detik)
+                        cmd.CommandTimeout = 180;
                         
                         using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
                         {

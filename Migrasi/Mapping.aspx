@@ -4,7 +4,7 @@
     <div class="container py-4">
         <div class="row mt-4">
             <div class="col-12">
-                <div class="card card-modern">
+                <div class="card card-modern shadow-lg border-0">
                     <div class="card-header border-0 py-4 px-4 d-flex justify-content-between align-items-center" style="background-color: var(--bg-header);">
                         <div>
                             <h4 class="mb-1 fw-bold text-dark">Mapping Padanan</h4>
@@ -53,6 +53,22 @@
                     </div>
                 </div>
             </div>
+        </div>
+        </div>
+
+        <!-- SQL Script Reference Alert -->
+        <div class="alert alert-info border-info border-start border-4 shadow-sm mt-4 mb-4" role="alert">
+            <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-info-circle-fill fs-5 me-2"></i>
+                <h6 class="mb-0 fw-bold">Required SQL Table Setup</h6>
+            </div>
+            <p class="mb-2 small">Before using this feature, please ensure this table exists in your <strong>SimulasiDB</strong> database:</p>
+            <div class="bg-dark text-success p-3 rounded font-monospace small" style="white-space: pre;">CREATE TABLE TMappingPadanan (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    MappingKey VARCHAR(255) NOT NULL,
+    FromCode VARCHAR(255) NOT NULL,
+    ToCode VARCHAR(255) NOT NULL
+);</div>
         </div>
     </div>
 

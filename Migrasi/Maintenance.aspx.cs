@@ -18,8 +18,48 @@ namespace Migrasi
         {
             if (!IsPostBack)
             {
+                LoadDatabases();
                 BindGrid();
             }
+        }
+
+        private void LoadDatabases()
+        {
+            ddlTargetDB.Items.Clear();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    string query = "SELECT name FROM sys.databases WHERE state_desc = 'ONLINE' ORDER BY name";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        conn.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            ddlTargetDB.DataSource = reader;
+                            ddlTargetDB.DataTextField = "name";
+                            ddlTargetDB.DataValueField = "name";
+                            ddlTargetDB.DataBind();
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                try
+                {
+                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connString);
+                    string defaultDb = builder.InitialCatalog;
+                    if (!string.IsNullOrEmpty(defaultDb))
+                    {
+                        ddlTargetDB.Items.Add(new ListItem(defaultDb, defaultDb));
+                    }
+                }
+                catch { }
+            }
+            
+            // Tambahkan opsi default kosong
+            ddlTargetDB.Items.Insert(0, new ListItem("-- Default (Connection String) --", ""));
         }
 
         private void BindGrid()
@@ -46,6 +86,7 @@ namespace Migrasi
             string fileName = txtFileName.Text.Trim();
             string spName = txtSPName.Text.Trim();
             string spUpload = txtSPUpload.Text.Trim();
+            string targetDb = ddlTargetDB.SelectedValue;
 
             if (string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(spName))
             {
@@ -57,15 +98,17 @@ namespace Migrasi
             {
                 string query = "";
                 if (id == 0)
-                    query = "INSERT INTO T_MaintenanceGenerate (FileGenerate, NamaSPGenerate, NamaSPUpload) VALUES (@File, @SP, @SPUp)";
+                    query = "INSERT INTO T_MaintenanceGenerate (FileGenerate, NamaSPGenerate, NamaSPUpload, TargetDB) VALUES (@File, @SP, @SPUp, @TargetDB)";
                 else
-                    query = "UPDATE T_MaintenanceGenerate SET FileGenerate = @File, NamaSPGenerate = @SP, NamaSPUpload = @SPUp WHERE ID = @ID";
+                    query = "UPDATE T_MaintenanceGenerate SET FileGenerate = @File, NamaSPGenerate = @SP, NamaSPUpload = @SPUp, TargetDB = @TargetDB WHERE ID = @ID";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@File", fileName);
                     cmd.Parameters.AddWithValue("@SP", spName);
                     cmd.Parameters.AddWithValue("@SPUp", (object)spUpload ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@TargetDB", string.IsNullOrEmpty(targetDb) ? DBNull.Value : (object)targetDb);
+                    
                     if (id != 0) cmd.Parameters.AddWithValue("@ID", id);
 
                     conn.Open();
@@ -104,6 +147,16 @@ namespace Migrasi
                             txtFileName.Text = dr["FileGenerate"].ToString();
                             txtSPName.Text = dr["NamaSPGenerate"].ToString();
                             txtSPUpload.Text = dr["NamaSPUpload"].ToString();
+                            
+                            string targetDb = dr["TargetDB"] != DBNull.Value ? dr["TargetDB"].ToString() : "";
+                            if (ddlTargetDB.Items.FindByValue(targetDb) != null)
+                            {
+                                ddlTargetDB.SelectedValue = targetDb;
+                            }
+                            else
+                            {
+                                ddlTargetDB.SelectedIndex = 0;
+                            }
                         }
                     }
                 }
@@ -133,6 +186,7 @@ namespace Migrasi
             txtFileName.Text = "";
             txtSPName.Text = "";
             txtSPUpload.Text = "";
+            ddlTargetDB.SelectedIndex = 0;
         }
     }
 }

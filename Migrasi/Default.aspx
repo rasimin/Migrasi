@@ -86,6 +86,18 @@
                                 </div>
                             </a>
                         </div>
+                        <!-- Card 7 -->
+                        <div class="col-md-4">
+                            <a href="DatabaseMaster" class="text-decoration-none h-100">
+                                <div class="card card-modern h-100 p-3 transition-transform">
+                                    <div class="card-body">
+                                        <div class="h1 mb-4 text-warning opacity-75"><i class="bi bi-server"></i></div>
+                                        <h5 class="fw-bold text-dark">Database Master</h5>
+                                        <p class="small text-secondary">Kelola daftar database sistem dan sinkronisasi otomatis.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

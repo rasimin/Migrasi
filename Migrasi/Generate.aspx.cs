@@ -95,11 +95,40 @@ namespace Migrasi
             if (string.IsNullOrEmpty(spName)) return null;
 
             string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+            
+            // Fetch TargetDB if configured
+            string targetDb = "";
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    string queryConfig = "SELECT TargetDB FROM T_MaintenanceGenerate WHERE NamaSPGenerate = @SPName";
+                    using (SqlCommand cmd = new SqlCommand(queryConfig, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@SPName", spName);
+                        conn.Open();
+                        object result = cmd.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            targetDb = result.ToString();
+                        }
+                    }
+                }
+            }
+            catch { /* Ignore error, fallback to default */ }
+
             using (SqlConnection conn = new SqlConnection(connString))
             {
+                conn.Open();
+                if (!string.IsNullOrEmpty(targetDb))
+                {
+                    conn.ChangeDatabase(targetDb);
+                }
+
                 using (SqlCommand cmd = new SqlCommand(spName, conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandTimeout = 180; // Add timeout
                     using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();

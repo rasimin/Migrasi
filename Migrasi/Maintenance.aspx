@@ -4,7 +4,7 @@
     <main>
         <div class="row mt-4">
             <div class="col-12">
-                <div class="card card-modern">
+                <div class="card card-modern shadow-lg border-0">
                     <div class="card-header border-0 py-4 px-4 d-flex justify-content-between align-items-center" style="background-color: var(--bg-header);">
                         <div>
                             <h4 class="mb-1 fw-bold text-dark">Data Configuration</h4>
@@ -24,6 +24,7 @@
                                     <asp:BoundField DataField="FileGenerate" HeaderText="File Name" ItemStyle-CssClass="fw-500" />
                                     <asp:BoundField DataField="NamaSPGenerate" HeaderText="SP Generate" ItemStyle-CssClass="font-monospace text-primary small" />
                                     <asp:BoundField DataField="NamaSPUpload" HeaderText="SP Upload" ItemStyle-CssClass="font-monospace text-info small" />
+                                    <asp:BoundField DataField="TargetDB" HeaderText="Target DB" ItemStyle-CssClass="fw-bold text-warning small" NullDisplayText="<i class='text-muted'>(Default DB)</i>" HtmlEncode="False" />
                                     <asp:BoundField DataField="CreatedAt" HeaderText="Created At" DataFormatString="{0:yyyy-MM-dd}" ItemStyle-CssClass="text-secondary small" />
                                             <asp:TemplateField HeaderText="Actions" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end">
                                         <ItemTemplate>
@@ -37,6 +38,22 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- SQL Script Reference Alert -->
+        <div class="alert alert-info border-info border-start border-4 shadow-sm mt-4 mb-4" role="alert">
+            <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-info-circle-fill fs-5 me-2"></i>
+                <h6 class="mb-0 fw-bold">Required SQL Table Setup</h6>
+            </div>
+            <p class="mb-2 small">Before using this feature, please ensure this table exists in your <strong>SimulasiDB</strong> database:</p>
+            <div class="bg-dark text-success p-3 rounded font-monospace small" style="white-space: pre;">CREATE TABLE T_MaintenanceGenerate (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    FileGenerate VARCHAR(500) NOT NULL,
+    NamaSPGenerate VARCHAR(255) NOT NULL,
+    NamaSPUpload VARCHAR(255) NULL,
+    TargetDB VARCHAR(255) NULL
+);</div>
         </div>
 
         <!-- Modal -->
@@ -61,6 +78,12 @@
                             <label class="form-label text-secondary small fw-bold">SP UPLOAD (WRITE)</label>
                             <asp:TextBox ID="txtSPUpload" runat="server" CssClass="form-control form-control-lg fs-6 font-monospace" placeholder="usp_InsertProduct"></asp:TextBox>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small fw-bold">TARGET DATABASE (Optional)</label>
+                            <asp:DropDownList ID="ddlTargetDB" runat="server" CssClass="form-select form-select-lg fs-6">
+                            </asp:DropDownList>
+                            <div class="form-text small text-muted mt-1">If left empty, the system will use the default database in Connection String.</div>
+                        </div>
                     </div>
                     <div class="modal-footer border-0 px-4 pb-4">
                         <button type="button" class="btn btn-light btn-modern text-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -77,6 +100,7 @@
             document.getElementById('<%= txtFileName.ClientID %>').value = "";
             document.getElementById('<%= txtSPName.ClientID %>').value = "";
             document.getElementById('<%= txtSPUpload.ClientID %>').value = "";
+            document.getElementById('<%= ddlTargetDB.ClientID %>').value = "";
             document.getElementById('addModalLabel').innerText = "Add New Configuration";
             showModal();
         }

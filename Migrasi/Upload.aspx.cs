@@ -100,6 +100,27 @@ namespace Migrasi
 
             if (dt == null || string.IsNullOrEmpty(spName)) { ShowAlert("Data lost. Please preview the file again."); return; }
 
+            // Fetch TargetDB if configured
+            string targetDb = "";
+            try
+            {
+                using (SqlConnection connConfig = new SqlConnection(connString))
+                {
+                    string queryConfig = "SELECT TargetDB FROM T_MaintenanceGenerate WHERE NamaSPUpload = @SPName";
+                    using (SqlCommand cmdConfig = new SqlCommand(queryConfig, connConfig))
+                    {
+                        cmdConfig.Parameters.AddWithValue("@SPName", spName);
+                        connConfig.Open();
+                        object result = cmdConfig.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            targetDb = result.ToString();
+                        }
+                    }
+                }
+            }
+            catch { /* Ignore error, fallback to default */ }
+
             int successCount = 0;
             int errorCount = 0;
             string lastError = "";
@@ -107,6 +128,11 @@ namespace Migrasi
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 conn.Open();
+                if (!string.IsNullOrEmpty(targetDb))
+                {
+                    conn.ChangeDatabase(targetDb);
+                }
+                
                 foreach (DataRow row in dt.Rows)
                 {
                     try

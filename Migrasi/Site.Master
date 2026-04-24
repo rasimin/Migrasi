@@ -379,6 +379,7 @@
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Upload"><i class="bi bi-file-earmark-arrow-up me-2"></i>Upload</a></li>
                         <li class="nav-item"><a class="nav-link text-success" runat="server" href="~/Mapping"><i class="bi bi-intersect me-2"></i>Mapping</a></li>
                         <li class="nav-item"><a class="nav-link text-info" runat="server" href="~/SPGenerator"><i class="bi bi-code-square me-2"></i>SP Maker</a></li>
+                        <li class="nav-item"><a class="nav-link text-warning" runat="server" href="~/DatabaseMaster"><i class="bi bi-server me-2"></i>DB Master</a></li>
                         <li class="nav-item"><a class="nav-link text-primary" runat="server" href="~/Query"><i class="bi bi-terminal me-2"></i>Query</a></li>
                         <li>
                             <div class="theme-toggle shadow-sm" onclick="toggleTheme()">
