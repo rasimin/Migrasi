@@ -1,4 +1,4 @@
-<%@ Page Title="Generate Data" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Generate.aspx.cs" Inherits="Migrasi.Generate" %>
+<%@ Page Title="Generate Data" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Generate.aspx.cs" Inherits="Migrasi.Generate" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <main>
@@ -13,7 +13,7 @@
                         <div class="d-flex align-items-center gap-2">
                             <div class="d-flex align-items-center bg-light p-1 rounded-3 border">
                                 <span class="small fw-bold text-secondary px-3">CONFIG</span>
-                                <asp:DropDownList ID="ddlConfig" runat="server" CssClass="form-select form-select-sm border-0 shadow-sm fw-500" style="width: 250px; border-radius: 6px;" DataTextField="FileGenerate" DataValueField="NamaSPGenerate">
+                                <asp:DropDownList ID="ddlConfig" runat="server" CssClass="form-select form-select-sm border-0 shadow-sm fw-500" style="width: 250px; border-radius: 6px;" DataTextField="FileGenerate" DataValueField="ID">
                                 </asp:DropDownList>
                             </div>
                             <asp:Button ID="btnPreview" runat="server" Text="Preview Data" CssClass="btn btn-light btn-modern btn-sm border shadow-sm px-3" OnClick="btnPreview_Click" />

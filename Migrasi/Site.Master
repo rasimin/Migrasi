@@ -90,6 +90,21 @@
         .nav-link:hover {
             color: var(--primary-blue) !important;
         }
+        
+        /* Dropdown Styling for Dark Mode Compatibility */
+        .dropdown-menu {
+            background-color: var(--bg-card) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+        .dropdown-item {
+            color: var(--text-main) !important;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .dropdown-item:hover, .dropdown-item:focus {
+            background-color: var(--table-header) !important;
+            color: var(--primary-blue) !important;
+        }
         .btn-modern {
             border-radius: 8px;
             padding: 0.6rem 1.5rem;
@@ -374,14 +389,39 @@
                 <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/"><i class="bi bi-house-door me-2"></i>Home</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Maintenance"><i class="bi bi-gear me-2"></i>Config</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Generate"><i class="bi bi-file-earmark-arrow-down me-2"></i>Generate</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Upload"><i class="bi bi-file-earmark-arrow-up me-2"></i>Upload</a></li>
-                        <li class="nav-item"><a class="nav-link text-success" runat="server" href="~/Mapping"><i class="bi bi-intersect me-2"></i>Mapping</a></li>
-                        <li class="nav-item"><a class="nav-link text-info" runat="server" href="~/SPGenerator"><i class="bi bi-code-square me-2"></i>SP Maker</a></li>
-                        <li class="nav-item"><a class="nav-link text-warning" runat="server" href="~/DatabaseMaster"><i class="bi bi-server me-2"></i>DB Master</a></li>
-                        <li class="nav-item"><a class="nav-link text-primary" runat="server" href="~/Query"><i class="bi bi-terminal me-2"></i>Query</a></li>
-                        <li>
+                        
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="operationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-rocket-takeoff me-2"></i>Operations
+                            </a>
+                            <ul class="dropdown-menu border-0 shadow-sm rounded-3" aria-labelledby="operationsDropdown">
+                                <li><a class="dropdown-item py-2" runat="server" href="~/Generate"><i class="bi bi-file-earmark-arrow-down me-2 text-primary"></i>Generate TXT</a></li>
+                                <li><a class="dropdown-item py-2" runat="server" href="~/Upload"><i class="bi bi-file-earmark-arrow-up me-2 text-primary"></i>Upload TXT</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="configDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-gear me-2"></i>Configurations
+                            </a>
+                            <ul class="dropdown-menu border-0 shadow-sm rounded-3" aria-labelledby="configDropdown">
+                                <li><a class="dropdown-item py-2" runat="server" href="~/DatabaseMaster"><i class="bi bi-server me-2 text-warning"></i>DB Master</a></li>
+                                <li><a class="dropdown-item py-2" runat="server" href="~/Maintenance"><i class="bi bi-gear-fill me-2 text-secondary"></i>Config Center</a></li>
+                                <li><a class="dropdown-item py-2" runat="server" href="~/Mapping"><i class="bi bi-intersect me-2 text-success"></i>Mapping Center</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-info" href="#" id="devToolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-tools me-2"></i>Dev Tools
+                            </a>
+                            <ul class="dropdown-menu border-0 shadow-sm rounded-3 dropdown-menu-end" aria-labelledby="devToolsDropdown">
+                                <li><a class="dropdown-item py-2" runat="server" href="~/SPGenerator"><i class="bi bi-code-square me-2 text-info"></i>SP Maker</a></li>
+                                <li><a class="dropdown-item py-2" runat="server" href="~/Query"><i class="bi bi-terminal me-2 text-primary"></i>Query Runner</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item ms-2">
                             <div class="theme-toggle shadow-sm" onclick="toggleTheme()">
                                 <i id="theme-icon" class="bi bi-sun-fill"></i>
                             </div>

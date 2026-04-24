@@ -1,4 +1,4 @@
-<%@ Page Title="Upload Data" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Upload.aspx.cs" Inherits="Migrasi.Upload" %>
+<%@ Page Title="Upload Data" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Upload.aspx.cs" Inherits="Migrasi.Upload" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <main>

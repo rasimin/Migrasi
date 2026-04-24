@@ -1,4 +1,4 @@
-<%@ Page Title="Query Runner" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Query.aspx.cs" Inherits="Migrasi.Query" %>
+<%@ Page Title="Query Runner" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Query.aspx.cs" Inherits="Migrasi.Query" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <div class="container-fluid py-4">
@@ -34,9 +34,15 @@
                                 placeholder="-- Write your SQL query here (SELECT, UPDATE, DELETE, EXEC...)"
                                 style="background-color: var(--bg-body); color: var(--text-main); border-color: var(--border-color); resize: vertical; width: 100% !important; min-width: 100%;"></asp:TextBox>
                         </div>
+                    </div>
+            </div>
+        </div>
+    </div>
 
-                        <!-- Results & Messages Tabs -->
-                        <div class="mt-4">
+        <!-- Results Breakout (Full Width) -->
+        <div class="full-width-breakout mt-4 px-sm-5 px-3 pb-5">
+            <!-- Results & Messages Tabs -->
+            <div>
                             <ul class="nav nav-tabs border-bottom-0 gap-2" id="queryTabs" role="tablist">
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link active btn-modern border-0 px-4 py-2" id="results-tab" data-bs-toggle="tab" data-bs-target="#results" type="button" role="tab">
@@ -71,12 +77,15 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <style>
+        .full-width-breakout {
+            margin-left: calc(-50vw + 50%);
+            margin-right: calc(-50vw + 50%);
+            width: 100vw;
+            max-width: 100vw;
+        }
+        
         .nav-tabs .nav-link {
             color: var(--text-muted);
             background-color: var(--table-header);

@@ -1,4 +1,4 @@
-<%@ Page Title="Maintenance" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Maintenance.aspx.cs" Inherits="Migrasi.Maintenance" %>
+<%@ Page Title="Maintenance" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Maintenance.aspx.cs" Inherits="Migrasi.Maintenance" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <main>
@@ -22,7 +22,8 @@
                                 <Columns>
                                     <asp:BoundField DataField="ID" HeaderText="ID" ReadOnly="True" ItemStyle-CssClass="text-secondary small" />
                                     <asp:BoundField DataField="FileGenerate" HeaderText="File Name" ItemStyle-CssClass="fw-500" />
-                                    <asp:BoundField DataField="NamaSPGenerate" HeaderText="SP Generate" ItemStyle-CssClass="font-monospace text-primary small" />
+                                    <asp:BoundField DataField="GenerateType" HeaderText="Type" ItemStyle-CssClass="small text-muted" />
+                                    <asp:BoundField DataField="NamaSPGenerate" HeaderText="SP / Query Generate" ItemStyle-CssClass="font-monospace text-primary small sql-column" />
                                     <asp:BoundField DataField="NamaSPUpload" HeaderText="SP Upload" ItemStyle-CssClass="font-monospace text-info small" />
                                     <asp:BoundField DataField="TargetDB" HeaderText="Target DB" ItemStyle-CssClass="fw-bold text-warning small" NullDisplayText="<i class='text-muted'>(Default DB)</i>" HtmlEncode="False" />
                                     <asp:BoundField DataField="CreatedAt" HeaderText="Created At" DataFormatString="{0:yyyy-MM-dd}" ItemStyle-CssClass="text-secondary small" />
@@ -50,7 +51,8 @@
             <div class="bg-dark text-success p-3 rounded font-monospace small" style="white-space: pre;">CREATE TABLE T_MaintenanceGenerate (
     ID INT IDENTITY(1,1) PRIMARY KEY,
     FileGenerate VARCHAR(500) NOT NULL,
-    NamaSPGenerate VARCHAR(255) NOT NULL,
+    GenerateType VARCHAR(50) DEFAULT 'SP',
+    NamaSPGenerate VARCHAR(MAX) NOT NULL,
     NamaSPUpload VARCHAR(255) NULL,
     TargetDB VARCHAR(255) NULL
 );</div>
@@ -58,7 +60,7 @@
 
         <!-- Modal -->
         <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                     <div class="modal-header border-0 pt-4 px-4">
                         <h5 class="modal-title fw-bold text-dark" id="addModalLabel">Configuration Details</h5>
@@ -68,19 +70,26 @@
                         <asp:HiddenField ID="hfID" runat="server" Value="0" />
                         <div class="mb-3">
                             <label class="form-label text-secondary small fw-bold">FILE NAME</label>
-                            <asp:TextBox ID="txtFileName" runat="server" CssClass="form-control form-control-lg fs-6" placeholder="e.g., product_data.txt"></asp:TextBox>
+                            <asp:TextBox ID="txtFileName" runat="server" CssClass="form-control form-control-lg fs-6 w-100" placeholder="e.g., product_data.txt"></asp:TextBox>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label text-secondary small fw-bold">SP GENERATE (READ)</label>
-                            <asp:TextBox ID="txtSPName" runat="server" CssClass="form-control form-control-lg fs-6 font-monospace" placeholder="usp_GetProducts"></asp:TextBox>
+                            <label class="form-label text-secondary small fw-bold">GENERATE TYPE</label>
+                            <asp:DropDownList ID="ddlGenerateType" runat="server" CssClass="form-select form-select-lg fs-6 w-100">
+                                <asp:ListItem Text="Stored Procedure" Value="SP"></asp:ListItem>
+                                <asp:ListItem Text="Plain SQL Query" Value="Plain SQL"></asp:ListItem>
+                            </asp:DropDownList>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small fw-bold">SP / QUERY GENERATE (READ)</label>
+                            <asp:TextBox ID="txtSPName" runat="server" TextMode="MultiLine" Rows="8" CssClass="form-control form-control-lg fs-6 font-monospace w-100" placeholder="usp_GetProducts ATAU SELECT * FROM..."></asp:TextBox>
                         </div>
                         <div class="mb-3">
                             <label class="form-label text-secondary small fw-bold">SP UPLOAD (WRITE)</label>
-                            <asp:TextBox ID="txtSPUpload" runat="server" CssClass="form-control form-control-lg fs-6 font-monospace" placeholder="usp_InsertProduct"></asp:TextBox>
+                            <asp:TextBox ID="txtSPUpload" runat="server" CssClass="form-control form-control-lg fs-6 font-monospace w-100" placeholder="usp_InsertProduct"></asp:TextBox>
                         </div>
                         <div class="mb-3">
                             <label class="form-label text-secondary small fw-bold">TARGET DATABASE (Optional)</label>
-                            <asp:DropDownList ID="ddlTargetDB" runat="server" CssClass="form-select form-select-lg fs-6">
+                            <asp:DropDownList ID="ddlTargetDB" runat="server" CssClass="form-select form-select-lg fs-6 w-100">
                             </asp:DropDownList>
                             <div class="form-text small text-muted mt-1">If left empty, the system will use the default database in Connection String.</div>
                         </div>
@@ -94,10 +103,27 @@
         </div>
     </main>
 
+    <style>
+        .sql-column {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Force inputs to fill modal width */
+        #addModal .form-control, 
+        #addModal .form-select {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+    </style>
+
     <script type="text/javascript">
         function resetAndShow() {
             document.getElementById('<%= hfID.ClientID %>').value = "0";
             document.getElementById('<%= txtFileName.ClientID %>').value = "";
+            document.getElementById('<%= ddlGenerateType.ClientID %>').value = "SP";
             document.getElementById('<%= txtSPName.ClientID %>').value = "";
             document.getElementById('<%= txtSPUpload.ClientID %>').value = "";
             document.getElementById('<%= ddlTargetDB.ClientID %>').value = "";

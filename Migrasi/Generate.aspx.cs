@@ -27,7 +27,7 @@ namespace Migrasi
             string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
             using (SqlConnection conn = new SqlConnection(connString))
             {
-                string query = "SELECT FileGenerate, NamaSPGenerate FROM T_MaintenanceGenerate ORDER BY FileGenerate";
+                string query = "SELECT ID, FileGenerate FROM T_MaintenanceGenerate ORDER BY FileGenerate";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     conn.Open();
@@ -91,31 +91,47 @@ namespace Migrasi
 
         private DataTable GetData()
         {
-            string spName = ddlConfig.SelectedValue;
-            if (string.IsNullOrEmpty(spName)) return null;
+            string configIdStr = ddlConfig.SelectedValue;
+            if (string.IsNullOrEmpty(configIdStr)) return null;
+            
+            int configId = 0;
+            if (!int.TryParse(configIdStr, out configId)) return null;
 
             string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
             
-            // Fetch TargetDB if configured
+            // Fetch configuration details dynamically
             string targetDb = "";
+            string generateType = "SP";
+            string spName = "";
+            
             try
             {
                 using (SqlConnection conn = new SqlConnection(connString))
                 {
-                    string queryConfig = "SELECT TargetDB FROM T_MaintenanceGenerate WHERE NamaSPGenerate = @SPName";
+                    string queryConfig = "SELECT NamaSPGenerate, TargetDB, GenerateType FROM T_MaintenanceGenerate WHERE ID = @ID";
                     using (SqlCommand cmd = new SqlCommand(queryConfig, conn))
                     {
-                        cmd.Parameters.AddWithValue("@SPName", spName);
+                        cmd.Parameters.AddWithValue("@ID", configId);
                         conn.Open();
-                        object result = cmd.ExecuteScalar();
-                        if (result != null && result != DBNull.Value)
+                        using (SqlDataReader reader = cmd.ExecuteReader())
                         {
-                            targetDb = result.ToString();
+                            if (reader.Read())
+                            {
+                                spName = reader["NamaSPGenerate"].ToString();
+                                
+                                if (reader["TargetDB"] != DBNull.Value)
+                                    targetDb = reader["TargetDB"].ToString();
+                                    
+                                if (reader["GenerateType"] != DBNull.Value)
+                                    generateType = reader["GenerateType"].ToString();
+                            }
                         }
                     }
                 }
             }
-            catch { /* Ignore error, fallback to default */ }
+            catch { return null; }
+
+            if (string.IsNullOrEmpty(spName)) return null;
 
             using (SqlConnection conn = new SqlConnection(connString))
             {
@@ -127,7 +143,7 @@ namespace Migrasi
 
                 using (SqlCommand cmd = new SqlCommand(spName, conn))
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandType = generateType == "Plain SQL" ? CommandType.Text : CommandType.StoredProcedure;
                     cmd.CommandTimeout = 180; // Add timeout
                     using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
                     {

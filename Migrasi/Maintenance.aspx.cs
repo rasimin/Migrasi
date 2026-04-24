@@ -84,6 +84,7 @@ namespace Migrasi
         {
             int id = int.Parse(hfID.Value);
             string fileName = txtFileName.Text.Trim();
+            string generateType = ddlGenerateType.SelectedValue;
             string spName = txtSPName.Text.Trim();
             string spUpload = txtSPUpload.Text.Trim();
             string targetDb = ddlTargetDB.SelectedValue;
@@ -98,13 +99,14 @@ namespace Migrasi
             {
                 string query = "";
                 if (id == 0)
-                    query = "INSERT INTO T_MaintenanceGenerate (FileGenerate, NamaSPGenerate, NamaSPUpload, TargetDB) VALUES (@File, @SP, @SPUp, @TargetDB)";
+                    query = "INSERT INTO T_MaintenanceGenerate (FileGenerate, GenerateType, NamaSPGenerate, NamaSPUpload, TargetDB) VALUES (@File, @Type, @SP, @SPUp, @TargetDB)";
                 else
-                    query = "UPDATE T_MaintenanceGenerate SET FileGenerate = @File, NamaSPGenerate = @SP, NamaSPUpload = @SPUp, TargetDB = @TargetDB WHERE ID = @ID";
+                    query = "UPDATE T_MaintenanceGenerate SET FileGenerate = @File, GenerateType = @Type, NamaSPGenerate = @SP, NamaSPUpload = @SPUp, TargetDB = @TargetDB WHERE ID = @ID";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@File", fileName);
+                    cmd.Parameters.AddWithValue("@Type", generateType);
                     cmd.Parameters.AddWithValue("@SP", spName);
                     cmd.Parameters.AddWithValue("@SPUp", (object)spUpload ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@TargetDB", string.IsNullOrEmpty(targetDb) ? DBNull.Value : (object)targetDb);
@@ -145,6 +147,13 @@ namespace Migrasi
                         {
                             hfID.Value = dr["ID"].ToString();
                             txtFileName.Text = dr["FileGenerate"].ToString();
+                            
+                            string genType = dr["GenerateType"] != DBNull.Value ? dr["GenerateType"].ToString() : "SP";
+                            if (ddlGenerateType.Items.FindByValue(genType) != null)
+                            {
+                                ddlGenerateType.SelectedValue = genType;
+                            }
+                            
                             txtSPName.Text = dr["NamaSPGenerate"].ToString();
                             txtSPUpload.Text = dr["NamaSPUpload"].ToString();
                             
@@ -184,6 +193,7 @@ namespace Migrasi
         {
             hfID.Value = "0";
             txtFileName.Text = "";
+            ddlGenerateType.SelectedValue = "SP";
             txtSPName.Text = "";
             txtSPUpload.Text = "";
             ddlTargetDB.SelectedIndex = 0;
