@@ -10,7 +10,7 @@
                         <p class="text-secondary small mb-0">Upload and process standardized TXT files</p>
                     </div>
                     <div class="card-body px-4 pb-4">
-                        <div class="row g-4 align-items-end mb-4 bg-light p-4 rounded-4 mx-0">
+                        <div class="row g-4 align-items-end mb-4 bg-light p-4 rounded-4 mx-0 mt-2">
                             <div class="col-md-4">
                                 <label class="form-label text-secondary small fw-bold">1. CONFIGURATION</label>
                                 <asp:DropDownList ID="ddlConfig" runat="server" CssClass="form-select form-select-lg fs-6" DataTextField="FileGenerate" DataValueField="NamaSPUpload">
@@ -31,7 +31,7 @@
                                     <h5 class="mb-0 text-dark fw-bold">Analysis Results</h5>
                                     <p class="text-secondary small mb-0">Review the mapped data before committing to database</p>
                                 </div>
-                                <asp:Label ID="lblTotal" runat="server" CssClass="badge rounded-pill text-primary fw-bold px-3 py-2" style="background-color: var(--table-header);"></asp:Label>
+                                <asp:Label ID="lblTotal" runat="server" CssClass="badge rounded-pill text-primary fw-bold px-3 py-2"></asp:Label>
                             </div>
                             
                             <div class="table-responsive rounded-3 border" style="max-height: 450px; overflow-y: auto;">

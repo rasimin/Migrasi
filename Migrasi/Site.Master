@@ -109,14 +109,32 @@
         .table-modern th {
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.75rem;
+            font-size: 0.7rem; /* More compact */
             letter-spacing: 0.05em;
-            color: var(--text-muted);
+            color: var(--text-main) !important; /* Force visibility */
             border-bottom: 2px solid var(--border-color);
+            padding: 0.6rem 0.75rem !important; /* Reduced padding */
+            transition: background-color 0.2s;
+        }
+        .table-modern th:hover {
+            background-color: var(--border-color) !important;
+            color: var(--text-main) !important; /* Keep text bright on hover */
+            cursor: default;
         }
         .table-modern td {
             color: var(--text-main);
             border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+            font-size: 0.825rem; /* More compact */
+            padding: 0.4rem 0.75rem !important; /* Reduced padding */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(2, 132, 199, 0.08) !important;
+            color: var(--text-main) !important;
+        }
+        .table-hover tbody tr:hover td {
+            color: var(--text-main) !important;
         }
         .text-dark { color: var(--text-main) !important; }
         .text-secondary { color: var(--text-muted) !important; }
@@ -160,6 +178,81 @@
         }
         .swal2-title, .swal2-html-container {
             color: var(--text-main) !important;
+        }
+
+        /* Form Controls Fix for Dark Mode */
+        .form-control, .form-select {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            border-color: var(--border-color);
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.25rem rgba(2, 132, 199, 0.25);
+        }
+        .form-control::placeholder {
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+        .bg-white { background-color: var(--bg-card) !important; }
+        .text-dark { color: var(--text-main) !important; }
+
+        /* Badge Customization for Dark Mode Visibility */
+        [data-bs-theme="dark"] .badge.bg-light.text-primary {
+            background-color: rgba(2, 132, 199, 0.2) !important;
+            color: #7dd3fc !important; /* Lighter blue for better contrast */
+        }
+        /* File Input Styling */
+        .form-control::file-selector-button {
+            background-color: var(--table-header);
+            color: var(--text-main);
+            border: none;
+            border-right: 1px solid var(--border-color);
+            margin-right: 1rem;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s;
+        }
+        .form-control:hover::file-selector-button {
+            background-color: var(--border-color);
+        }
+        /* Custom Scrollbar for Dark Mode */
+        [data-bs-theme="dark"] ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        [data-bs-theme="dark"] ::-webkit-scrollbar-track {
+            background: var(--bg-body);
+        }
+        [data-bs-theme="dark"] ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 5px;
+            border: 2px solid var(--bg-body);
+        }
+        [data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Improved Badge Contrast for Total Records */
+        [data-bs-theme="dark"] .badge.text-primary {
+            color: #38bdf8 !important; /* Brighter Sky Blue */
+            background-color: rgba(56, 189, 248, 0.15) !important;
+        }
+        /* Modal Customization for Dark Mode */
+        [data-bs-theme="dark"] .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+        [data-bs-theme="dark"] .modal-header {
+            border-bottom: 1px solid var(--border-color);
+        }
+        [data-bs-theme="dark"] .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+        [data-bs-theme="dark"] .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
         }
     </style>
     <script>

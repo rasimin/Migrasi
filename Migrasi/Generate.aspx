@@ -5,7 +5,7 @@
         <div class="row mt-4">
             <div class="col-12">
                 <div class="card card-modern">
-                    <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+                    <div class="card-header border-0 py-4 px-4 d-flex justify-content-between align-items-center" style="background-color: var(--bg-header);">
                         <div>
                             <h4 class="mb-1 fw-bold text-dark">Data Generation</h4>
                             <p class="text-secondary small mb-0">Export data to standardized TXT format</p>
@@ -13,7 +13,7 @@
                         <div class="d-flex align-items-center gap-2">
                             <div class="d-flex align-items-center bg-light p-1 rounded-3 border">
                                 <span class="small fw-bold text-secondary px-3">CONFIG</span>
-                                <asp:DropDownList ID="ddlConfig" runat="server" CssClass="form-select form-select-sm border-0 bg-white shadow-sm fw-500" style="width: 250px; border-radius: 6px;" DataTextField="FileGenerate" DataValueField="NamaSPGenerate">
+                                <asp:DropDownList ID="ddlConfig" runat="server" CssClass="form-select form-select-sm border-0 shadow-sm fw-500" style="width: 250px; border-radius: 6px;" DataTextField="FileGenerate" DataValueField="NamaSPGenerate">
                                 </asp:DropDownList>
                             </div>
                             <asp:Button ID="btnPreview" runat="server" Text="Preview Data" CssClass="btn btn-light btn-modern btn-sm border shadow-sm px-3" OnClick="btnPreview_Click" />
@@ -23,7 +23,7 @@
                     <div class="card-body p-0">
                         <div class="px-4 py-2 border-bottom d-flex justify-content-between align-items-center" style="background-color: var(--bg-header);">
                             <span class="text-secondary small">Data Preview Area</span>
-                            <asp:Label ID="lblTotal" runat="server" CssClass="badge rounded-pill text-primary fw-bold px-3 py-2" style="background-color: var(--table-header);" Text="0 Records Found" Visible="false"></asp:Label>
+                            <asp:Label ID="lblTotal" runat="server" CssClass="badge rounded-pill text-primary fw-bold px-3 py-2" Text="0 Records Found" Visible="false"></asp:Label>
                         </div>
                         <div class="table-responsive" style="overflow-x: auto;">
                             <asp:GridView ID="gvProducts" runat="server" CssClass="table table-hover table-modern mb-0" 
@@ -55,9 +55,9 @@
             display: block;
             padding: 6px 12px;
             text-decoration: none;
-            background-color: #fff;
-            border: 1px solid #dee2e6;
-            color: #0d6efd;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--primary-blue);
             border-radius: 4px;
             margin: 0 3px;
             font-size: 14px;
@@ -65,13 +65,13 @@
             text-align: center;
         }
         .custom-pagination .active-page {
-            background-color: #0d6efd !important;
+            background-color: var(--primary-blue) !important;
             color: #fff !important;
-            border-color: #0d6efd !important;
+            border-color: var(--primary-blue) !important;
             cursor: default;
         }
         .custom-pagination a:hover:not(.active-page) {
-            background-color: #e9ecef;
+            background-color: var(--table-header);
         }
     </style>
 </asp:Content>

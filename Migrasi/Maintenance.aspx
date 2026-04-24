@@ -5,7 +5,7 @@
         <div class="row mt-4">
             <div class="col-12">
                 <div class="card card-modern">
-                    <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+                    <div class="card-header border-0 py-4 px-4 d-flex justify-content-between align-items-center" style="background-color: var(--bg-header);">
                         <div>
                             <h4 class="mb-1 fw-bold text-dark">Data Configuration</h4>
                             <p class="text-secondary small mb-0">Manage your file mappings and stored procedures</p>
@@ -20,12 +20,12 @@
                                 AutoGenerateColumns="False" DataKeyNames="ID" OnRowDeleting="gvMaintenance_RowDeleting" 
                                 OnRowEditing="gvMaintenance_RowEditing" GridLines="None">
                                 <Columns>
-                                    <asp:BoundField DataField="ID" HeaderText="ID" ReadOnly="True" ItemStyle-CssClass="px-4 py-3 text-secondary small" HeaderStyle-CssClass="px-4" />
-                                    <asp:BoundField DataField="FileGenerate" HeaderText="File Name" ItemStyle-CssClass="py-3 fw-500" />
-                                    <asp:BoundField DataField="NamaSPGenerate" HeaderText="SP Generate" ItemStyle-CssClass="py-3 font-monospace text-primary small" />
-                                    <asp:BoundField DataField="NamaSPUpload" HeaderText="SP Upload" ItemStyle-CssClass="py-3 font-monospace text-info small" />
-                                    <asp:BoundField DataField="CreatedAt" HeaderText="Created At" DataFormatString="{0:yyyy-MM-dd}" ItemStyle-CssClass="py-3 text-secondary small" />
-                                            <asp:TemplateField HeaderText="Actions" HeaderStyle-CssClass="text-end px-4" ItemStyle-CssClass="text-end px-4 py-3">
+                                    <asp:BoundField DataField="ID" HeaderText="ID" ReadOnly="True" ItemStyle-CssClass="text-secondary small" />
+                                    <asp:BoundField DataField="FileGenerate" HeaderText="File Name" ItemStyle-CssClass="fw-500" />
+                                    <asp:BoundField DataField="NamaSPGenerate" HeaderText="SP Generate" ItemStyle-CssClass="font-monospace text-primary small" />
+                                    <asp:BoundField DataField="NamaSPUpload" HeaderText="SP Upload" ItemStyle-CssClass="font-monospace text-info small" />
+                                    <asp:BoundField DataField="CreatedAt" HeaderText="Created At" DataFormatString="{0:yyyy-MM-dd}" ItemStyle-CssClass="text-secondary small" />
+                                            <asp:TemplateField HeaderText="Actions" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end">
                                         <ItemTemplate>
                                             <asp:LinkButton ID="btnEdit" runat="server" CommandName="Edit" CssClass="btn btn-light btn-sm text-warning me-1"><i class="bi bi-pencil-square"></i></asp:LinkButton>
                                             <asp:LinkButton ID="btnDelete" runat="server" CommandName="Delete" CssClass="btn btn-light btn-sm text-danger" OnClientClick="return confirmDelete(this, 'Delete this configuration?');"><i class="bi bi-trash"></i></asp:LinkButton>

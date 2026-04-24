@@ -20,22 +20,22 @@
                                 CssClass="table table-hover table-modern mb-0" GridLines="None" 
                                 OnRowCommand="gvMapping_RowCommand" DataKeyNames="id">
                                 <Columns>
-                                    <asp:BoundField DataField="id" HeaderText="ID" ItemStyle-CssClass="ps-4 fw-bold text-secondary" HeaderStyle-CssClass="ps-4" />
+                                    <asp:BoundField DataField="id" HeaderText="ID" ItemStyle-CssClass="fw-bold text-secondary" />
                                     <asp:TemplateField HeaderText="MAPPING KEY">
                                         <ItemTemplate>
-                                            <span class="badge bg-light text-primary fw-bold px-3 py-2"><%# Eval("MappingKey") %></span>
+                                            <span class="badge bg-light text-primary fw-bold px-2 py-1"><%# Eval("MappingKey") %></span>
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                     <asp:BoundField DataField="FromCode" HeaderText="FROM CODE" />
                                     <asp:BoundField DataField="ToCode" HeaderText="TO CODE" />
-                                    <asp:TemplateField HeaderText="ACTIONS" ItemStyle-CssClass="text-end pe-4" HeaderStyle-CssClass="text-end pe-4">
+                                    <asp:TemplateField HeaderText="ACTIONS" ItemStyle-CssClass="text-end" HeaderStyle-CssClass="text-end">
                                         <ItemTemplate>
                                             <div class="btn-group shadow-sm rounded-3 overflow-hidden">
-                                                <asp:LinkButton ID="btnEdit" runat="server" CommandName="EditMapping" CommandArgument='<%# Eval("id") %>' CssClass="btn btn-white btn-sm px-3" ToolTip="Edit">
+                                                <asp:LinkButton ID="btnEdit" runat="server" CommandName="EditMapping" CommandArgument='<%# Eval("id") %>' CssClass="btn btn-light btn-sm px-2 border-0" ToolTip="Edit">
                                                     <i class="bi bi-pencil-square text-warning"></i>
                                                 </asp:LinkButton>
                                                 <asp:LinkButton ID="btnDelete" runat="server" OnClientClick='<%# "return confirmDelete(this, \"Are you sure you want to delete mapping for " + Eval("FromCode") + "?\");" %>' 
-                                                    CommandName="DeleteMapping" CommandArgument='<%# Eval("id") %>' CssClass="btn btn-white btn-sm px-3" ToolTip="Delete">
+                                                    CommandName="DeleteMapping" CommandArgument='<%# Eval("id") %>' CssClass="btn btn-light btn-sm px-2 border-0" ToolTip="Delete">
                                                     <i class="bi bi-trash3 text-danger"></i>
                                                 </asp:LinkButton>
                                             </div>

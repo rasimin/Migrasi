@@ -59,7 +59,7 @@
         }
         .transition-transform:hover {
             transform: translateY(-8px);
-            border: 1px solid #bae6fd;
+            border: 1px solid var(--primary-blue);
         }
         .fw-600 { font-weight: 600; }
     </style>
