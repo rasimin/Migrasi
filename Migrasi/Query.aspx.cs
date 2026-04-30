@@ -13,6 +13,12 @@ namespace Migrasi
 {
     public partial class Query : Page
     {
+        protected global::System.Web.UI.WebControls.DropDownList ddlDatabase;
+        protected global::System.Web.UI.WebControls.TextBox txtQuery;
+        protected global::System.Web.UI.WebControls.PlaceHolder phGrids;
+        protected global::System.Web.UI.WebControls.Literal litEmpty;
+        protected global::System.Web.UI.WebControls.Literal litMessages;
+
         string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
 
         protected void Page_Load(object sender, EventArgs e)

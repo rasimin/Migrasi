@@ -12,6 +12,12 @@ namespace Migrasi
 {
     public partial class Mapping : Page
     {
+        protected global::System.Web.UI.WebControls.GridView gvMapping;
+        protected global::System.Web.UI.WebControls.HiddenField hfMappingId;
+        protected global::System.Web.UI.WebControls.TextBox txtMappingKey;
+        protected global::System.Web.UI.WebControls.TextBox txtFromCode;
+        protected global::System.Web.UI.WebControls.TextBox txtToCode;
+
         string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
 
         protected void Page_Load(object sender, EventArgs e)

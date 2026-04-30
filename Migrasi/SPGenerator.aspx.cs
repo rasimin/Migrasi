@@ -11,6 +11,11 @@ namespace Migrasi
 {
     public partial class SPGenerator : System.Web.UI.Page
     {
+        protected global::System.Web.UI.WebControls.FileUpload fileUpload;
+        protected global::System.Web.UI.WebControls.TextBox txtSPName;
+        protected global::System.Web.UI.WebControls.TextBox txtResult;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl resultArea;
+
         protected void Page_Load(object sender, EventArgs e)
         {
         }
@@ -30,8 +35,6 @@ namespace Migrasi
                 using (StreamReader reader = new StreamReader(fileUpload.FileContent))
                 {
                     string headerLine = reader.ReadLine();
-                    string dataLine = reader.ReadLine();
-
                     if (string.IsNullOrEmpty(headerLine))
                     {
                         throw new Exception("The file is empty or invalid.");
@@ -48,10 +51,19 @@ namespace Migrasi
 
                     if (duplicates.Any())
                     {
-                        throw new Exception($"Failed! Duplicate column names detected: {string.Join(", ", duplicates)}. All columns in the file must have unique names.");
+                        throw new Exception($"Failed! Duplicate column names detected: {string.Join(", ", duplicates)}.");
                     }
 
-                    string[] samples = !string.IsNullOrEmpty(dataLine) ? dataLine.Split('|') : new string[headers.Length];
+                    // Read all rows to find the best data type for each column
+                    List<string[]> allRows = new List<string[]>();
+                    while (!reader.EndOfStream)
+                    {
+                        string line = reader.ReadLine();
+                        if (!string.IsNullOrWhiteSpace(line))
+                        {
+                            allRows.Add(line.Split('|'));
+                        }
+                    }
 
                     StringBuilder sb = new StringBuilder();
                     sb.AppendLine($"/****** Object:  StoredProcedure [dbo].[{spName}] ******/");
@@ -61,7 +73,19 @@ namespace Migrasi
                     for (int i = 0; i < headers.Length; i++)
                     {
                         string colName = headers[i].Trim().Replace(" ", "_");
-                        string dataType = GuessDataType(samples.Length > i ? samples[i] : "");
+                        
+                        // Find a non-empty sample for this column across all rows
+                        string bestSample = "";
+                        foreach (var row in allRows)
+                        {
+                            if (row.Length > i && !string.IsNullOrWhiteSpace(row[i]))
+                            {
+                                bestSample = row[i];
+                                break; // Found first non-null data
+                            }
+                        }
+
+                        string dataType = GuessDataType(bestSample);
                         
                         string comma = (i == headers.Length - 1) ? "" : ",";
                         sb.AppendLine($"    @{colName} {dataType}{comma}");
@@ -90,9 +114,6 @@ namespace Migrasi
                     }
                     sb.AppendLine("    )");
                     sb.AppendLine("    */");
-                    sb.AppendLine("");
-                    sb.AppendLine("    -- Optional: Return success message");
-                    sb.AppendLine("    -- PRINT 'Data inserted successfully';");
                     sb.AppendLine("END");
 
                     txtResult.Text = sb.ToString();

@@ -29,6 +29,7 @@
                                     <asp:BoundField DataField="CreatedAt" HeaderText="Created At" DataFormatString="{0:yyyy-MM-dd}" ItemStyle-CssClass="text-secondary small" />
                                             <asp:TemplateField HeaderText="Actions" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end">
                                         <ItemTemplate>
+                                            <asp:LinkButton ID="btnMapping" runat="server" CssClass="btn btn-light btn-sm text-info me-1" OnClientClick='<%# "openMappingModal(" + Eval("ID") + ", \"" + Eval("NamaSPUpload") + "\", \"" + Eval("TargetDB") + "\"); return false;" %>' ToolTip="Configure Mapping"><i class="bi bi-intersect"></i></asp:LinkButton>
                                             <asp:LinkButton ID="btnEdit" runat="server" CommandName="Edit" CssClass="btn btn-light btn-sm text-warning me-1"><i class="bi bi-pencil-square"></i></asp:LinkButton>
                                             <asp:LinkButton ID="btnDelete" runat="server" CommandName="Delete" CssClass="btn btn-light btn-sm text-danger" OnClientClick="return confirmDelete(this, 'Delete this configuration?');"><i class="bi bi-trash"></i></asp:LinkButton>
                                         </ItemTemplate>
@@ -47,8 +48,12 @@
                 <i class="bi bi-info-circle-fill fs-5 me-2"></i>
                 <h6 class="mb-0 fw-bold">Required SQL Table Setup</h6>
             </div>
-            <p class="mb-2 small">Before using this feature, please ensure this table exists in your <strong>SimulasiDB</strong> database:</p>
-            <div class="bg-dark text-success p-3 rounded font-monospace small" style="white-space: pre;">CREATE TABLE T_MaintenanceGenerate (
+            <p class="mb-2 small">Ensure these tables exist in your <strong>SimulasiDB</strong> database for proper operation:</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="text-secondary small mb-1 fw-bold">1. Configuration Table</div>
+                    <div class="bg-dark text-success p-3 rounded font-monospace" style="white-space: pre; font-size: 0.7rem; line-height: 1.2;">CREATE TABLE T_MaintenanceGenerate (
     ID INT IDENTITY(1,1) PRIMARY KEY,
     FileGenerate VARCHAR(500) NOT NULL,
     GenerateType VARCHAR(50) DEFAULT 'SP',
@@ -56,6 +61,20 @@
     NamaSPUpload VARCHAR(255) NULL,
     TargetDB VARCHAR(255) NULL
 );</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-secondary small mb-1 fw-bold">2. Upload Log Table</div>
+                    <div class="bg-dark text-info p-3 rounded font-monospace" style="white-space: pre; font-size: 0.7rem; line-height: 1.2;">CREATE TABLE T_UploadLog (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    ConfigID INT,
+    FileName VARCHAR(500),
+    RawData VARCHAR(MAX),
+    Status VARCHAR(20),
+    ErrorMessage VARCHAR(MAX),
+    CreatedAt DATETIME DEFAULT GETDATE()
+);</div>
+                </div>
+            </div>
         </div>
 
         <!-- Modal -->
@@ -101,6 +120,8 @@
                 </div>
             </div>
         </div>
+
+        </div>
     </main>
 
     <style>
@@ -118,6 +139,103 @@
             max-width: 100% !important;
         }
     </style>
+
+    <!-- Full Screen Mapping Modal -->
+    <div class="modal fade" id="mappingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content border-0 shadow-lg">
+                <!-- Header -->
+                <div class="modal-header border-0 py-3 px-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);">
+                    <h5 class="modal-title fw-bold text-white"><i class="bi bi-intersect me-2"></i>Field Mapping Configuration</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="border-bottom py-3 px-4 shadow-sm" style="background: var(--bg-card);">
+                    <div class="row align-items-center g-2">
+                        <div class="col-auto">
+                            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 fw-bold">ID: <span id="mapConfigID"></span></span>
+                        </div>
+                        <div class="col-auto">
+                            <span class="badge bg-info bg-opacity-10 text-info px-3 py-2 fw-bold font-monospace">SP: <span id="mapSPName">—</span></span>
+                        </div>
+                        <div class="col"></div>
+                        <div class="col-auto d-flex gap-2">
+                            <button type="button" class="btn btn-outline-success btn-sm" id="btnAutoMatch" onclick="autoMatchColumns()" disabled title="Auto-map columns with matching parameter names">
+                                <i class="bi bi-lightning-fill me-1"></i>Auto Match
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="btnClearAll" onclick="clearAllMappings()">
+                                <i class="bi bi-eraser me-1"></i>Clear All
+                            </button>
+                            <input type="file" id="sampleFile" class="d-none" accept=".txt" onchange="readSampleFile(this)" />
+                            <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('sampleFile').click()">
+                                <i class="bi bi-file-earmark-arrow-up me-1"></i>Upload Sample TXT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body p-0 d-flex flex-column" style="background: var(--bg-body);">
+                    <div class="flex-grow-1 p-4 overflow-auto">
+                        <!-- Mapping Content Area -->
+                        <div id="mappingContent">
+                            <!-- Will be filled by JS: either mapping table or SP-not-found UI -->
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <p class="text-muted mt-2 small">Loading...</p>
+                            </div>
+                        </div>
+
+                        <!-- Sample Data Preview -->
+                        <div id="samplePreview" class="mt-4 d-none">
+                            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                                <div class="card-header border-0 py-2 px-3 d-flex align-items-center" style="background: var(--table-header);">
+                                    <h6 class="mb-0 small fw-bold"><i class="bi bi-table me-2 text-info"></i>SAMPLE DATA PREVIEW</h6>
+                                    <span id="sampleRowCount" class="badge bg-info bg-opacity-10 text-info ms-2 small"></span>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
+                                        <table class="table table-sm table-striped mb-0 small" id="sampleTable">
+                                            <thead class="sticky-top" style="background: var(--table-header);"><tr id="sampleHead"></tr></thead>
+                                            <tbody id="sampleBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer border-top py-3 px-4" style="background: var(--bg-card);">
+                    <div class="me-auto text-secondary small">
+                        <i class="bi bi-info-circle me-1"></i>Mapping → <b>T_MappingDetail</b>
+                        <span id="mappingStats" class="ms-3 badge bg-success bg-opacity-10 text-success d-none"></span>
+                    </div>
+                    <button type="button" class="btn btn-light btn-modern text-secondary px-4" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-modern px-5 shadow-sm" id="btnSaveMapping" onclick="saveMapping()" disabled>
+                        <i class="bi bi-check-circle me-2"></i>Save Mapping
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mapping Modal Styles -->
+    <style>
+        #mappingContent .mapping-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        #mappingContent .mapping-table th { background: var(--table-header); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 14px; font-weight: 700; border-bottom: 2px solid var(--border-color); }
+        #mappingContent .mapping-table td { padding: 10px 14px; border-bottom: 1px solid var(--border-color); vertical-align: middle; font-size: 0.85rem; }
+        #mappingContent .mapping-table tr:hover td { background: rgba(2,132,199,0.04); }
+        #mappingContent .mapping-table .col-select { min-width: 200px; }
+        #mappingContent .mapping-table select { border-radius: 8px; font-size: 0.82rem; padding: 6px 10px; }
+        #mappingContent .mapping-table select.mapped { border-color: #10b981; background-color: rgba(16,185,129,0.06); }
+        .arrow-icon { color: var(--primary-blue); font-size: 1.1rem; }
+        .sp-gen-card { max-width: 600px; margin: 0 auto; }
+    </style>
+
+    <script src='<%= ResolveUrl("~/Scripts/mapping.js") %>'></script>
 
     <script type="text/javascript">
         function resetAndShow() {

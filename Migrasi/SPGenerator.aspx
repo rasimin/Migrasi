@@ -1,4 +1,4 @@
-<%@ Page Title="SP Generator" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="SPGenerator.aspx.cs" Inherits="Migrasi.SPGenerator" %>
+<%@ Page Title="SP Generator" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="SPGenerator.aspx.cs" Inherits="Migrasi.SPGenerator" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <main>
@@ -17,7 +17,7 @@
                         <div class="row g-4 align-items-end mb-4 bg-light p-4 rounded-4 mx-0 mt-2">
                             <div class="col-md-5">
                                 <label class="form-label text-secondary small fw-bold">1. SAMPLE TXT FILE</label>
-                                <asp:FileUpload ID="fileUpload" runat="server" CssClass="form-control form-control-lg fs-6" />
+                                <asp:FileUpload ID="fileUpload" runat="server" CssClass="form-control form-control-lg fs-6" accept=".txt" />
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label text-secondary small fw-bold">2. PROCEDURE NAME</label>

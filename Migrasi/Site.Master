@@ -397,6 +397,8 @@
                             <ul class="dropdown-menu border-0 shadow-sm rounded-3" aria-labelledby="operationsDropdown">
                                 <li><a class="dropdown-item py-2" runat="server" href="~/Generate"><i class="bi bi-file-earmark-arrow-down me-2 text-primary"></i>Generate TXT</a></li>
                                 <li><a class="dropdown-item py-2" runat="server" href="~/Upload"><i class="bi bi-file-earmark-arrow-up me-2 text-primary"></i>Upload TXT</a></li>
+                                <li><hr class="dropdown-divider opacity-25"></li>
+                                <li><a class="dropdown-item py-2" runat="server" href="~/Logs"><i class="bi bi-journal-text me-2 text-info"></i>Upload Logs</a></li>
                             </ul>
                         </li>
 

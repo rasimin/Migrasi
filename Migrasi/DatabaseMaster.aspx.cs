@@ -12,6 +12,10 @@ namespace Migrasi
 {
     public partial class DatabaseMaster : Page
     {
+        protected global::System.Web.UI.WebControls.GridView gvDatabases;
+        protected global::System.Web.UI.WebControls.TextBox txtNewDBName;
+        protected global::System.Web.UI.WebControls.TextBox txtNewDescription;
+
         string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
 
         protected void Page_Load(object sender, EventArgs e)

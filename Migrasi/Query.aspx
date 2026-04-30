@@ -1,4 +1,4 @@
-<%@ Page Title="Query Runner" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Query.aspx.cs" Inherits="Migrasi.Query" %>
+<%@ Page Title="Query Runner" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Query.aspx.cs" Inherits="Migrasi.Query" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <div class="container-fluid py-4">
@@ -31,7 +31,7 @@
                             <label class="form-label text-secondary small fw-bold mb-2">SQL COMMAND EDITOR</label>
                             <asp:TextBox ID="txtQuery" runat="server" TextMode="MultiLine" Rows="12" 
                                 CssClass="form-control font-monospace p-3 fs-6 shadow-sm border-2" 
-                                placeholder="-- Write your SQL query here (SELECT, UPDATE, DELETE, EXEC...)"
+                                placeholder="-- Write your SQL query here (SELECT...)"
                                 style="background-color: var(--bg-body); color: var(--text-main); border-color: var(--border-color); resize: vertical; width: 100% !important; min-width: 100%;"></asp:TextBox>
                         </div>
                     </div>
@@ -43,40 +43,40 @@
         <div class="full-width-breakout mt-4 px-sm-5 px-3 pb-5">
             <!-- Results & Messages Tabs -->
             <div>
-                            <ul class="nav nav-tabs border-bottom-0 gap-2" id="queryTabs" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active btn-modern border-0 px-4 py-2" id="results-tab" data-bs-toggle="tab" data-bs-target="#results" type="button" role="tab">
-                                        <i class="bi bi-table me-2"></i>Results
-                                    </button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link btn-modern border-0 px-4 py-2" id="messages-tab" data-bs-toggle="tab" data-bs-target="#messages" type="button" role="tab">
-                                        <i class="bi bi-info-circle me-2"></i>Messages
-                                    </button>
-                                </li>
-                            </ul>
+                <ul class="nav nav-tabs border-bottom-0 gap-2" id="queryTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active btn-modern border-0 px-4 py-2" id="results-tab" data-bs-toggle="tab" data-bs-target="#results" type="button" role="tab">
+                            <i class="bi bi-table me-2"></i>Results
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link btn-modern border-0 px-4 py-2" id="messages-tab" data-bs-toggle="tab" data-bs-target="#messages" type="button" role="tab">
+                            <i class="bi bi-info-circle me-2"></i>Messages
+                        </button>
+                    </li>
+                </ul>
                             
-                            <div class="tab-content card border rounded-3 overflow-hidden" id="queryTabsContent" style="background-color: var(--bg-card); min-height: 300px;">
-                                <!-- Tab Results -->
-                                <div class="tab-pane fade show active p-0" id="results" role="tabpanel">
-                                    <div id="resultsContainer" class="p-3">
-                                        <asp:PlaceHolder ID="phGrids" runat="server"></asp:PlaceHolder>
-                                        <asp:Literal ID="litEmpty" runat="server">
-                                            <div class="p-5 text-center text-secondary">
-                                                <i class="bi bi-inbox display-4 d-block mb-3 opacity-25"></i>
-                                                No data to display. Run a SELECT query to see results.
-                                            </div>
-                                        </asp:Literal>
-                                    </div>
+                <div class="tab-content card border rounded-3 overflow-hidden" id="queryTabsContent" style="background-color: var(--bg-card); min-height: 300px;">
+                    <!-- Tab Results -->
+                    <div class="tab-pane fade show active p-0" id="results" role="tabpanel">
+                        <div id="resultsContainer" class="p-3">
+                            <asp:PlaceHolder ID="phGrids" runat="server"></asp:PlaceHolder>
+                            <asp:Literal ID="litEmpty" runat="server">
+                                <div class="p-5 text-center text-secondary">
+                                    <i class="bi bi-inbox display-4 d-block mb-3 opacity-25"></i>
+                                    No data to display. Run a SELECT query to see results.
                                 </div>
-                                
-                                <!-- Tab Messages -->
-                                <div class="tab-pane fade p-4" id="messages" role="tabpanel">
-                                    <asp:Literal ID="litMessages" runat="server"></asp:Literal>
-                                </div>
-                            </div>
+                            </asp:Literal>
                         </div>
                     </div>
+                                
+                    <!-- Tab Messages -->
+                    <div class="tab-pane fade p-4" id="messages" role="tabpanel">
+                        <asp:Literal ID="litMessages" runat="server"></asp:Literal>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     <style>
         .full-width-breakout {

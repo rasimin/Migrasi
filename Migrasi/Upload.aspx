@@ -18,7 +18,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label text-secondary small fw-bold">2. SELECT FILE</label>
-                                <asp:FileUpload ID="fileUpload" runat="server" CssClass="form-control form-control-lg fs-6" />
+                                <asp:FileUpload ID="fileUpload" runat="server" CssClass="form-control form-control-lg fs-6" accept=".txt" />
                             </div>
                             <div class="col-md-4">
                                 <asp:Button ID="btnPreview" runat="server" Text="Analyze & Preview" CssClass="btn btn-primary btn-modern w-100 shadow-sm" OnClick="btnPreview_Click" />
@@ -45,6 +45,41 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SQL Script Reference Alert -->
+        <div class="alert alert-info border-info border-start border-4 shadow-sm mt-4 mb-4" role="alert">
+            <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-info-circle-fill fs-5 me-2"></i>
+                <h6 class="mb-0 fw-bold">Required SQL Table Setup</h6>
+            </div>
+            <p class="mb-2 small">Ensure these tables exist in your <strong>SimulasiDB</strong> database for proper operation:</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="text-secondary small mb-1 fw-bold">1. Configuration Table</div>
+                    <div class="bg-dark text-success p-3 rounded font-monospace" style="white-space: pre; font-size: 0.7rem; line-height: 1.2;">CREATE TABLE T_MaintenanceGenerate (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    FileGenerate VARCHAR(500) NOT NULL,
+    GenerateType VARCHAR(50) DEFAULT 'SP',
+    NamaSPGenerate VARCHAR(MAX) NOT NULL,
+    NamaSPUpload VARCHAR(255) NULL,
+    TargetDB VARCHAR(255) NULL
+);</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-secondary small mb-1 fw-bold">2. Upload Log Table</div>
+                    <div class="bg-dark text-info p-3 rounded font-monospace" style="white-space: pre; font-size: 0.7rem; line-height: 1.2;">CREATE TABLE T_UploadLog (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    ConfigID INT,
+    FileName VARCHAR(500),
+    RawData VARCHAR(MAX),
+    Status VARCHAR(20),
+    ErrorMessage VARCHAR(MAX),
+    CreatedAt DATETIME DEFAULT GETDATE()
+);</div>
                 </div>
             </div>
         </div>

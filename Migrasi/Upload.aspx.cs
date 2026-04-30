@@ -49,6 +49,7 @@ namespace Migrasi
                 if (dt != null && dt.Rows.Count > 0)
                 {
                     ViewState["UploadData"] = dt;
+                    ViewState["UploadFileName"] = fileUpload.FileName; // Persist filename
                     gvUploadPreview.DataSource = dt;
                     gvUploadPreview.DataBind();
                     lblTotal.Text = "Rows Found: " + dt.Rows.Count;
@@ -96,34 +97,42 @@ namespace Migrasi
         protected void btnProcessUpload_Click(object sender, EventArgs e)
         {
             DataTable dt = ViewState["UploadData"] as DataTable;
+            string fileName = ViewState["UploadFileName"] as string ?? "Unknown";
             string spName = ddlConfig.SelectedValue;
 
             if (dt == null || string.IsNullOrEmpty(spName)) { ShowAlert("Data lost. Please preview the file again."); return; }
 
-            // Fetch TargetDB if configured
+            int successCount = 0;
+            int errorCount = 0;
+            string lastError = "";
+            int configID = 0;
+
+            // Fetch ConfigID and TargetDB if configured
             string targetDb = "";
             try
             {
                 using (SqlConnection connConfig = new SqlConnection(connString))
                 {
-                    string queryConfig = "SELECT TargetDB FROM T_MaintenanceGenerate WHERE NamaSPUpload = @SPName";
+                    string queryConfig = "SELECT ID, TargetDB FROM T_MaintenanceGenerate WHERE NamaSPUpload = @SPName";
                     using (SqlCommand cmdConfig = new SqlCommand(queryConfig, connConfig))
                     {
                         cmdConfig.Parameters.AddWithValue("@SPName", spName);
                         connConfig.Open();
-                        object result = cmdConfig.ExecuteScalar();
-                        if (result != null && result != DBNull.Value)
+                        using (SqlDataReader reader = cmdConfig.ExecuteReader())
                         {
-                            targetDb = result.ToString();
+                            if (reader.Read())
+                            {
+                                configID = Convert.ToInt32(reader["ID"]);
+                                if (reader["TargetDB"] != null && reader["TargetDB"] != DBNull.Value)
+                                {
+                                    targetDb = reader["TargetDB"].ToString();
+                                }
+                            }
                         }
                     }
                 }
             }
             catch { /* Ignore error, fallback to default */ }
-
-            int successCount = 0;
-            int errorCount = 0;
-            string lastError = "";
 
             using (SqlConnection conn = new SqlConnection(connString))
             {
@@ -132,22 +141,87 @@ namespace Migrasi
                 {
                     conn.ChangeDatabase(targetDb);
                 }
+
+                // Fetch Custom Mapping if exists
+                Dictionary<string, string> mappings = new Dictionary<string, string>();
+                using (SqlConnection connMap = new SqlConnection(ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString))
+                {
+                    string queryMap = "SELECT SourceColumn, TargetParameter FROM T_MappingDetail WHERE ConfigID = @CID";
+                    using (SqlCommand cmdMap = new SqlCommand(queryMap, connMap))
+                    {
+                        cmdMap.Parameters.AddWithValue("@CID", configID);
+                        connMap.Open();
+                        using (SqlDataReader rMap = cmdMap.ExecuteReader())
+                        {
+                            while (rMap.Read())
+                            {
+                                mappings[rMap["TargetParameter"].ToString()] = rMap["SourceColumn"].ToString();
+                            }
+                        }
+                    }
+                }
                 
                 foreach (DataRow row in dt.Rows)
                 {
+                    string currentRawData = string.Join("|", row.ItemArray);
+                    string status = "SUCCESS";
+                    string errorMsg = "";
+                    string fullSqlScript = "";
+
                     try
                     {
                         using (SqlCommand cmd = new SqlCommand(spName, conn))
                         {
                             cmd.CommandType = CommandType.StoredProcedure;
                             
-                            // Map each column to SP parameter
-                            foreach (DataColumn col in dt.Columns)
+                            if (mappings.Count > 0)
                             {
-                                // Assumption: Parameter name in SP matches Column Name in TXT
-                                string paramName = "@" + col.ColumnName;
-                                cmd.Parameters.AddWithValue(paramName, row[col.ColumnName]);
+                                // Use Custom Mapping
+                                foreach (var m in mappings)
+                                {
+                                    // Ensure column exists in TXT file
+                                    if (dt.Columns.Contains(m.Value))
+                                    {
+                                        string val = row[m.Value].ToString();
+                                        if (string.IsNullOrWhiteSpace(val))
+                                        {
+                                            cmd.Parameters.AddWithValue(m.Key, DBNull.Value);
+                                        }
+                                        else
+                                        {
+                                            decimal d;
+                                            if (decimal.TryParse(val, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out d))
+                                                cmd.Parameters.AddWithValue(m.Key, d);
+                                            else
+                                                cmd.Parameters.AddWithValue(m.Key, val);
+                                        }
+                                    }
+                                }
                             }
+                            else
+                            {
+                                // Default: Map each column to SP parameter by name
+                                foreach (DataColumn col in dt.Columns)
+                                {
+                                    string paramName = "@" + col.ColumnName;
+                                    string val = row[col.ColumnName].ToString();
+                                    if (string.IsNullOrWhiteSpace(val))
+                                    {
+                                        cmd.Parameters.AddWithValue(paramName, DBNull.Value);
+                                    }
+                                    else
+                                    {
+                                        decimal d;
+                                        if (decimal.TryParse(val, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out d))
+                                            cmd.Parameters.AddWithValue(paramName, d);
+                                        else
+                                            cmd.Parameters.AddWithValue(paramName, val);
+                                    }
+                                }
+                            }
+
+                            // Capture formatted SQL for logging
+                            fullSqlScript = GetFullSqlCommand(cmd);
 
                             cmd.ExecuteNonQuery();
                             successCount++;
@@ -156,8 +230,31 @@ namespace Migrasi
                     catch (Exception ex)
                     {
                         errorCount++;
+                        status = "FAILED";
+                        errorMsg = ex.Message;
                         lastError = ex.Message;
                     }
+
+                    // Insert Log into T_UploadLog
+                    try
+                    {
+                        using (SqlConnection connLog = new SqlConnection(connString))
+                        {
+                            string queryLog = "INSERT INTO T_UploadLog (ConfigID, FileName, RawData, Status, ErrorMessage, ScriptExecuted) VALUES (@CID, @FN, @RD, @ST, @EM, @SX)";
+                            using (SqlCommand cmdLog = new SqlCommand(queryLog, connLog))
+                            {
+                                cmdLog.Parameters.AddWithValue("@CID", configID);
+                                cmdLog.Parameters.AddWithValue("@FN", fileName);
+                                cmdLog.Parameters.AddWithValue("@RD", currentRawData);
+                                cmdLog.Parameters.AddWithValue("@ST", status);
+                                cmdLog.Parameters.AddWithValue("@EM", errorMsg);
+                                cmdLog.Parameters.AddWithValue("@SX", fullSqlScript);
+                                connLog.Open();
+                                cmdLog.ExecuteNonQuery();
+                            }
+                        }
+                    }
+                    catch { /* Fail silently if logging fails to prevent stopping the upload */ }
                 }
             }
 
@@ -177,6 +274,48 @@ namespace Migrasi
         {
             string title = type == "error" ? "Error" : (type == "success" ? "Success" : "Information");
             ScriptManager.RegisterStartupScript(this, GetType(), "alert", $"showAlert('{title}', '{msg.Replace("'", "\\'")}', '{type}');", true);
+        }
+
+        private string GetFullSqlCommand(SqlCommand cmd)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.Append("EXEC ").Append(cmd.CommandText).Append(" ");
+            
+            bool first = true;
+            foreach (SqlParameter param in cmd.Parameters)
+            {
+                if (!first) sb.Append(", ");
+                
+                sb.Append(param.ParameterName).Append(" = ");
+                
+                if (param.Value == null || param.Value == DBNull.Value)
+                {
+                    sb.Append("NULL");
+                }
+                else if (param.Value is DateTime)
+                {
+                    sb.Append("'").Append(Convert.ToDateTime(param.Value).ToString("yyyy-MM-dd HH:mm:ss")).Append("'");
+                }
+                else if (param.Value is string)
+                {
+                    string valStr = param.Value.ToString();
+                    // If it's a number, don't wrap in quotes for the log
+                    if (decimal.TryParse(valStr, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out _))
+                    {
+                        sb.Append(valStr);
+                    }
+                    else
+                    {
+                        sb.Append("'").Append(valStr.Replace("'", "''")).Append("'");
+                    }
+                }
+                else
+                {
+                    sb.Append(param.Value.ToString());
+                }
+                first = false;
+            }
+            return sb.ToString();
         }
     }
 }
