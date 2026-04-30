@@ -26,22 +26,40 @@ namespace Migrasi
         {
             using (SqlConnection conn = new SqlConnection(connString))
             {
-                string query = "SELECT * FROM T_UploadLog";
-                string statusFilter = ddlStatusFilter.SelectedValue;
+                List<string> conditions = new List<string>();
                 
-                if (!string.IsNullOrEmpty(statusFilter))
+                string statusFilter = ddlStatusFilter.SelectedValue;
+                if (!string.IsNullOrEmpty(statusFilter)) conditions.Add("Status = @Status");
+
+                if (!string.IsNullOrEmpty(txtStartDate.Text)) conditions.Add("CreatedAt >= @Start");
+                if (!string.IsNullOrEmpty(txtEndDate.Text)) conditions.Add("CreatedAt <= @End");
+
+                string search = txtSearch.Text.Trim();
+                if (!string.IsNullOrEmpty(search))
                 {
-                    query += " WHERE Status = @Status";
+                    conditions.Add("(FileName LIKE @Search OR ScriptExecuted LIKE @Search OR RawData LIKE @Search)");
+                }
+
+                string query = "SELECT * FROM T_UploadLog";
+                if (conditions.Count > 0)
+                {
+                    query += " WHERE " + string.Join(" AND ", conditions);
                 }
                 
                 query += " ORDER BY CreatedAt DESC";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    if (!string.IsNullOrEmpty(statusFilter))
-                    {
-                        cmd.Parameters.AddWithValue("@Status", statusFilter);
-                    }
+                    if (!string.IsNullOrEmpty(statusFilter)) cmd.Parameters.AddWithValue("@Status", statusFilter);
+                    
+                    if (!string.IsNullOrEmpty(txtStartDate.Text)) 
+                        cmd.Parameters.AddWithValue("@Start", txtStartDate.Text);
+                    
+                    if (!string.IsNullOrEmpty(txtEndDate.Text)) 
+                        cmd.Parameters.AddWithValue("@End", txtEndDate.Text + " 23:59:59");
+
+                    if (!string.IsNullOrEmpty(search)) 
+                        cmd.Parameters.AddWithValue("@Search", "%" + search + "%");
 
                     using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
                     {
@@ -54,7 +72,7 @@ namespace Migrasi
             }
         }
 
-        protected void Filter_Changed(object sender, EventArgs e)
+        protected void btnFilter_Click(object sender, EventArgs e)
         {
             gvLogs.PageIndex = 0;
             BindGrid();

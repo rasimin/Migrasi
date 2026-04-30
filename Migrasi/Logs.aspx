@@ -5,18 +5,47 @@
         <div class="row mt-4">
             <div class="col-12">
                 <div class="card card-modern shadow-lg border-0">
-                    <div class="card-header border-0 py-4 px-4 d-flex justify-content-between align-items-center" style="background-color: var(--bg-header);">
-                        <div>
-                            <h4 class="mb-1 fw-bold text-dark"><i class="bi bi-journal-text me-2 text-primary"></i>Upload Activity Logs</h4>
-                            <p class="text-secondary small mb-0">Monitor row-level upload status and error details</p>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <asp:DropDownList ID="ddlStatusFilter" runat="server" CssClass="form-select form-select-sm" AutoPostBack="true" OnSelectedIndexChanged="Filter_Changed">
-                                <asp:ListItem Text="All Status" Value=""></asp:ListItem>
-                                <asp:ListItem Text="Success Only" Value="SUCCESS"></asp:ListItem>
-                                <asp:ListItem Text="Failed Only" Value="FAILED"></asp:ListItem>
-                            </asp:DropDownList>
-                            <asp:Button ID="btnClearLogs" runat="server" Text="Clear All Logs" CssClass="btn btn-outline-danger btn-sm" OnClick="btnClearLogs_Click" OnClientClick="return confirm('Are you sure you want to delete ALL logs?');" />
+                    <div class="card-header border-0 py-3 px-4" style="background-color: var(--bg-header);">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                            <div>
+                                <h4 class="mb-1 fw-bold text-dark"><i class="bi bi-journal-text me-2 text-primary"></i>Upload Activity Logs</h4>
+                                <p class="text-secondary small mb-0">Monitor row-level upload status and error details</p>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2 align-items-center justify-content-md-end">
+                                <div class="d-flex flex-column">
+                                    <label class="x-small fw-bold text-uppercase text-muted mb-1" style="font-size: 0.65rem;">Date Range</label>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <asp:TextBox ID="txtStartDate" runat="server" CssClass="form-control form-control-sm" TextMode="Date" style="width: 135px;"></asp:TextBox>
+                                        <span class="text-muted small">-</span>
+                                        <asp:TextBox ID="txtEndDate" runat="server" CssClass="form-control form-control-sm" TextMode="Date" style="width: 135px;"></asp:TextBox>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <label class="x-small fw-bold text-uppercase text-muted mb-1" style="font-size: 0.65rem;">Search Keywords</label>
+                                    <div class="input-group input-group-sm" style="width: 220px;">
+                                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                        <asp:TextBox ID="txtSearch" runat="server" CssClass="form-control border-start-0" placeholder="File, script, raw..."></asp:TextBox>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <label class="x-small fw-bold text-uppercase text-muted mb-1" style="font-size: 0.65rem;">Status</label>
+                                    <asp:DropDownList ID="ddlStatusFilter" runat="server" CssClass="form-select form-select-sm" style="width: 110px;">
+                                        <asp:ListItem Text="All Status" Value=""></asp:ListItem>
+                                        <asp:ListItem Text="Success" Value="SUCCESS"></asp:ListItem>
+                                        <asp:ListItem Text="Failed" Value="FAILED"></asp:ListItem>
+                                    </asp:DropDownList>
+                                </div>
+                                <div class="d-flex align-items-end pt-3">
+                                    <div class="btn-group shadow-sm">
+                                        <asp:LinkButton ID="btnFilter" runat="server" CssClass="btn btn-primary btn-sm px-3" OnClick="btnFilter_Click">
+                                            <i class="bi bi-funnel-fill me-1"></i>Apply
+                                        </asp:LinkButton>
+                                        <asp:LinkButton ID="btnClearLogs" runat="server" CssClass="btn btn-outline-danger btn-sm" OnClick="btnClearLogs_Click" OnClientClick="return confirm('Delete ALL logs?');">
+                                            <i class="bi bi-trash"></i>
+                                        </asp:LinkButton>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="card-body p-0">
@@ -31,10 +60,10 @@
                                                 data-id='<%# Eval("ID") %>'
                                                 data-date='<%# Eval("CreatedAt", "{0:yyyy-MM-dd HH:mm:ss}") %>'
                                                 data-filename='<%# Eval("FileName") %>'
-                                                data-script='<%# HttpUtility.HtmlAttributeEncode(Eval("ScriptExecuted").ToString()) %>'
+                                                data-script='<%# Eval("ScriptExecuted") %>'
                                                 data-status='<%# Eval("Status") %>'
-                                                data-raw='<%# HttpUtility.HtmlAttributeEncode(Eval("RawData").ToString()) %>'
-                                                data-error='<%# HttpUtility.HtmlAttributeEncode(Eval("ErrorMessage").ToString()) %>'>
+                                                data-raw='<%# Eval("RawData") %>'
+                                                data-error='<%# Eval("ErrorMessage") %>'>
                                                 <i class="bi bi-eye me-1"></i>View
                                             </button>
                                         </ItemTemplate>

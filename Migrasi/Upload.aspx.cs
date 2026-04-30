@@ -107,6 +107,11 @@ namespace Migrasi
             string lastError = "";
             int configID = 0;
 
+            // Add status tracking columns to the DataTable
+            if (!dt.Columns.Contains("_Status")) dt.Columns.Add("_Status");
+            if (!dt.Columns.Contains("_Error")) dt.Columns.Add("_Error");
+            if (!dt.Columns.Contains("_Script")) dt.Columns.Add("_Script");
+
             // Fetch ConfigID and TargetDB if configured
             string targetDb = "";
             try
@@ -203,6 +208,8 @@ namespace Migrasi
                                 // Default: Map each column to SP parameter by name
                                 foreach (DataColumn col in dt.Columns)
                                 {
+                                    if (col.ColumnName.StartsWith("_")) continue; // Skip internal tracking columns
+
                                     string paramName = "@" + col.ColumnName;
                                     string val = row[col.ColumnName].ToString();
                                     if (string.IsNullOrWhiteSpace(val))
@@ -235,6 +242,11 @@ namespace Migrasi
                         lastError = ex.Message;
                     }
 
+                    // Update DataTable for immediate UI feedback
+                    row["_Status"] = status;
+                    row["_Error"] = errorMsg;
+                    row["_Script"] = fullSqlScript;
+
                     // Insert Log into T_UploadLog
                     try
                     {
@@ -258,15 +270,73 @@ namespace Migrasi
                 }
             }
 
+            // Rebind grid to show status and view buttons
+            ViewState["UploadData"] = dt;
+            gvUploadPreview.DataSource = dt;
+            gvUploadPreview.DataBind();
+
             string resultMsg = $"Upload Finished.\\nSuccess: {successCount}\\nFailed: {errorCount}";
             if (errorCount > 0) resultMsg += "\\nLast Error: " + lastError.Replace("'", "");
             
             ShowAlert(resultMsg, errorCount > 0 ? "warning" : "success");
             
-            if (errorCount == 0)
+            // We no longer hide the previewArea immediately so user can see row-level results
+        }
+
+        protected void gvUploadPreview_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
             {
-                previewArea.Visible = false;
-                ViewState["UploadData"] = null;
+                DataRowView row = (DataRowView)e.Row.DataItem;
+                bool hasStatusCol = row.DataView.Table.Columns.Contains("_Status");
+                bool hasErrorCol = row.DataView.Table.Columns.Contains("_Error");
+                bool hasScriptCol = row.DataView.Table.Columns.Contains("_Script");
+
+                string status = hasStatusCol && row["_Status"] != DBNull.Value ? row["_Status"].ToString() : "";
+                string error = hasErrorCol && row["_Error"] != DBNull.Value ? row["_Error"].ToString() : "";
+                string script = hasScriptCol && row["_Script"] != DBNull.Value ? row["_Script"].ToString() : "";
+                
+                // Calculate original column count (excluding our 3 tracking columns)
+                int trackingCols = (hasStatusCol ? 1 : 0) + (hasErrorCol ? 1 : 0) + (hasScriptCol ? 1 : 0);
+                string raw = string.Join("|", row.Row.ItemArray.Take(row.Row.ItemArray.Length - trackingCols));
+
+                Literal litStatus = (Literal)e.Row.FindControl("litStatus");
+                var btnView = (System.Web.UI.HtmlControls.HtmlButton)e.Row.FindControl("btnViewDetail");
+
+                if (!string.IsNullOrEmpty(status))
+                {
+                    string badgeClass = status == "SUCCESS" ? "bg-success-subtle text-success border border-success" : "bg-danger-subtle text-danger border border-danger";
+                    litStatus.Text = $"<span class='badge {badgeClass} px-2 py-1 small fw-bold'>{status}</span>";
+                    
+                    btnView.Style["display"] = "inline-block";
+                    btnView.Attributes["data-status"] = status;
+                    btnView.Attributes["data-status-badge"] = litStatus.Text;
+                    btnView.Attributes["data-error"] = error;
+                    btnView.Attributes["data-script"] = script;
+                    btnView.Attributes["data-raw"] = raw;
+                    btnView.Attributes["data-sp"] = ddlConfig.SelectedValue;
+                }
+                
+                // Hide the tracking columns from the grid visually if they exist
+                int totalCells = e.Row.Cells.Count;
+                if (hasScriptCol) e.Row.Cells[totalCells - 1].Visible = false;
+                if (hasErrorCol) e.Row.Cells[totalCells - 2].Visible = false;
+                if (hasStatusCol) e.Row.Cells[totalCells - 3].Visible = false;
+            }
+            else if (e.Row.RowType == DataControlRowType.Header)
+            {
+                bool hasStatusCol = false;
+                var ds = gvUploadPreview.DataSource;
+                if (ds is DataTable dtHeader) hasStatusCol = dtHeader.Columns.Contains("_Status");
+                else if (ds is DataView dvHeader) hasStatusCol = dvHeader.Table.Columns.Contains("_Status");
+
+                int totalCells = e.Row.Cells.Count;
+                if (hasStatusCol) // If one exists, all exist in this context
+                {
+                    e.Row.Cells[totalCells - 1].Visible = false;
+                    e.Row.Cells[totalCells - 2].Visible = false;
+                    e.Row.Cells[totalCells - 3].Visible = false;
+                }
             }
         }
 
