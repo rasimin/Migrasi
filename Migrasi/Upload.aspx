@@ -195,12 +195,26 @@
 
                             <asp:Panel ID="pnlExecution" runat="server">
                                 <div class="mt-5 text-center p-4 rounded-4" style="background-color: var(--bg-body); border: 1px dashed var(--primary-blue);">
+                                    <div class="mb-4 d-inline-block">
+                                        <div class="form-check form-switch bg-white px-4 py-2 rounded-pill shadow-sm border d-flex align-items-center gap-3" style="cursor: pointer;">
+                                            <input type="checkbox" id="chkSimulation" runat="server" class="form-check-input ms-0" style="width: 2.5em; height: 1.25em; cursor: pointer;" />
+                                            <label class="form-check-label fw-bold text-secondary small mb-0" for="MainContent_chkSimulation" style="cursor: pointer;">
+                                                <i class="bi bi-shield-check text-info me-1 fs-6"></i>Enable Simulation Mode (Rollback)
+                                            </label>
+                                        </div>
+                                    </div>
                                     <p class="text-success small fw-bold mb-3"><i class="bi bi-check-circle-fill me-2"></i>Data analysis complete. Ready for ingestion.</p>
                                     <asp:Button ID="btnProcessUpload" runat="server" Text="Execute Database Upload" CssClass="btn btn-success btn-modern px-5 shadow-sm" OnClick="btnProcessUpload_Click" OnClientClick="return confirm('Process this data to Database?');" />
                                 </div>
                             </asp:Panel>
 
                             <asp:Panel ID="pnlSummary" runat="server" Visible="false" CssClass="mt-5 pt-4 border-top">
+                                <asp:PlaceHolder ID="phSimulatedAlert" runat="server" Visible="false">
+                                    <div class="alert alert-warning border-0 rounded-4 shadow-sm mb-4 d-flex align-items-center justify-content-center py-2">
+                                        <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+                                        <span class="fw-bold">SIMULATION MODE ACTIVE: No data was committed to the database.</span>
+                                    </div>
+                                </asp:PlaceHolder>
                                 <div class="row justify-content-center g-3 mb-4">
                                     <div class="col-md-3">
                                         <div class="card border-0 shadow-sm rounded-4 bg-success bg-opacity-10 h-100">

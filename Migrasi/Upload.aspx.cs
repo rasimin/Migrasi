@@ -20,6 +20,8 @@ namespace Migrasi
         protected global::System.Web.UI.WebControls.Literal litSuccessCount;
         protected global::System.Web.UI.WebControls.Literal litFailedCount;
         protected global::System.Web.UI.WebControls.Literal litError;
+        protected global::System.Web.UI.HtmlControls.HtmlInputCheckBox chkSimulation;
+        protected global::System.Web.UI.WebControls.PlaceHolder phSimulatedAlert;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -248,7 +250,20 @@ namespace Migrasi
                             // Capture formatted SQL for logging
                             fullSqlScript = GetFullSqlCommand(cmd);
 
-                            cmd.ExecuteNonQuery();
+                            if (chkSimulation.Checked)
+                            {
+                                using (SqlTransaction tran = conn.BeginTransaction())
+                                {
+                                    cmd.Transaction = tran;
+                                    cmd.ExecuteNonQuery();
+                                    tran.Rollback(); // Always rollback in simulation mode
+                                }
+                            }
+                            else
+                            {
+                                cmd.ExecuteNonQuery();
+                            }
+                            
                             successCount++;
                         }
                     }
@@ -295,13 +310,17 @@ namespace Migrasi
 
             string resultMsg = $"Upload Finished.\\nSuccess: {successCount}\\nFailed: {errorCount}";
             if (errorCount > 0) resultMsg += "\\nLast Error: " + lastError.Replace("'", "");
-            
-            ShowAlert(resultMsg, errorCount > 0 ? "warning" : "success");
-            
+
             litSuccessCount.Text = successCount.ToString();
             litFailedCount.Text = errorCount.ToString();
             pnlExecution.Visible = false;
             pnlSummary.Visible = true;
+            phSimulatedAlert.Visible = chkSimulation.Checked;
+
+            string statusType = errorCount > 0 ? "warning" : "success";
+            if (chkSimulation.Checked) statusType = "info";
+
+            ShowAlert(resultMsg, statusType);
         }
 
         protected void btnReset_Click(object sender, EventArgs e)
