@@ -489,5 +489,99 @@ namespace Migrasi
             public string SourceColumn { get; set; }
             public string TargetParameter { get; set; }
         }
+        [System.Web.Services.WebMethod]
+        public static object QuickGenerateSP(string query, string targetDb, string spName)
+        {
+            string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    conn.Open();
+                    if (!string.IsNullOrEmpty(targetDb) && targetDb != "(Default DB)") conn.ChangeDatabase(targetDb);
+
+                    // Use SET FMTONLY ON to get schema without executing data
+                    string schemaQuery = "SET FMTONLY ON; " + query + "; SET FMTONLY OFF;";
+                    using (SqlCommand cmd = new SqlCommand(schemaQuery, conn))
+                    {
+                        using (SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.SchemaOnly))
+                        {
+                            DataTable schema = reader.GetSchemaTable();
+                            if (schema == null) return new { success = false, message = "Could not retrieve schema from query." };
+
+                            string script = "/****** Object:  StoredProcedure [dbo].[" + spName + "] ******/\n";
+                            script += "CREATE PROCEDURE [dbo].[" + spName + "]\n";
+                            
+                            List<string> paramList = new List<string>();
+                            foreach (DataRow row in schema.Rows)
+                            {
+                                string colName = row["ColumnName"].ToString();
+                                string dbType = row["DataTypeName"].ToString().ToLower();
+                                string spType = GuessSQLType(dbType);
+                                paramList.Add("    @" + colName.Replace(" ", "_") + " " + spType);
+                            }
+
+                            script += string.Join(",\n", paramList);
+                            script += "\nAS\nBEGIN\n    SET NOCOUNT ON;\n\n    -- TODO: Implement your upload logic here\n    -- Example: INSERT INTO YourTable (...) VALUES (...) \n\nEND";
+
+                            return new { success = true, script = script };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new { success = false, message = "Schema Error: " + ex.Message };
+            }
+        }
+
+        private static string GuessSQLType(string dbType)
+        {
+            if (dbType.Contains("int")) return "INT";
+            if (dbType.Contains("decimal") || dbType.Contains("numeric") || dbType.Contains("money") || dbType.Contains("float") || dbType.Contains("real")) 
+                return "DECIMAL(18, 4)";
+            if (dbType.Contains("date") || dbType.Contains("time")) return "DATETIME";
+            return "VARCHAR(500)";
+        }
+
+        [System.Web.Services.WebMethod]
+        public static object ExecuteAndSyncSP(string script, string spName, string targetDb, int configId)
+        {
+            string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    conn.Open();
+
+                    // 1. Create SP in target DB
+                    if (!string.IsNullOrEmpty(targetDb) && targetDb != "(Default DB)") conn.ChangeDatabase(targetDb);
+                    
+                    // Split script by GO if exists, or just execute as one
+                    using (SqlCommand cmd = new SqlCommand(script, conn))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    // 2. Sync back to Maintenance Table (Config DB)
+                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connString);
+                    conn.ChangeDatabase(builder.InitialCatalog);
+
+                    string updateSql = "UPDATE T_MaintenanceGenerate SET NamaSPUpload = @SP WHERE ID = @ID";
+                    using (SqlCommand uCmd = new SqlCommand(updateSql, conn))
+                    {
+                        uCmd.Parameters.AddWithValue("@SP", spName);
+                        uCmd.Parameters.AddWithValue("@ID", configId);
+                        uCmd.ExecuteNonQuery();
+                    }
+
+                    return new { success = true };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new { success = false, message = "Execution Error: " + ex.Message };
+            }
+        }
     }
 }

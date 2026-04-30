@@ -29,6 +29,9 @@
                                     <asp:BoundField DataField="CreatedAt" HeaderText="Created At" DataFormatString="{0:yyyy-MM-dd}" ItemStyle-CssClass="text-secondary small" />
                                     <asp:TemplateField HeaderText="Actions" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end">
                                         <ItemTemplate>
+                                            <button type="button" class="btn btn-light btn-sm text-info me-1" onclick='quickGenerateSP(<%# Eval("ID") %>, "<%# HttpUtility.JavaScriptStringEncode(Eval("NamaSPGenerate").ToString()) %>", "<%# Eval("TargetDB") %>", "<%# Eval("FileGenerate") %>")' title="Quick Generate SP from Query">
+                                                <i class="bi bi-magic"></i>
+                                            </button>
                                             <asp:LinkButton ID="btnEdit" runat="server" CommandName="Edit" CssClass="btn btn-light btn-sm text-warning me-1" ToolTip="Edit Configuration"><i class="bi bi-pencil-square"></i></asp:LinkButton>
                                             <asp:LinkButton ID="btnDelete" runat="server" CommandName="Delete" CssClass="btn btn-light btn-sm text-danger" OnClientClick="return confirmDelete(this, 'Delete this configuration?');" ToolTip="Delete Configuration"><i class="bi bi-trash"></i></asp:LinkButton>
                                         </ItemTemplate>
@@ -140,7 +143,128 @@
         }
     </style>
 
+        <!-- Magic SP Modal -->
+        <div class="modal fade" id="spPreviewModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                    <div class="modal-header border-0 pt-4 px-4">
+                        <h5 class="modal-title fw-bold text-dark"><i class="bi bi-magic me-2 text-info"></i>Magic SP Generator</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body px-4 pb-4">
+                        <div class="alert alert-info border-0 rounded-4 shadow-sm mb-3 small py-2">
+                            <i class="bi bi-info-circle me-2"></i>Automated schema detection from your source query.
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label class="form-label text-secondary small fw-bold">PROPOSED SP NAME</label>
+                                <input type="text" id="txtMagicSPName" class="form-control font-monospace" placeholder="usp_UploadData..." />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-secondary small fw-bold">TARGET DATABASE</label>
+                                <input type="text" id="txtMagicTargetDB" class="form-control" readonly />
+                            </div>
+                        </div>
+
+                        <div class="bg-dark rounded-4 overflow-hidden position-relative mb-3 w-100">
+                            <textarea id="txtMagicResult" class="form-control font-monospace p-4 w-100" 
+                                style="height: 400px; background: #0f172a; color: #22c55e; border: none; resize: vertical; font-size: 0.85rem; line-height: 1.5; min-width: 100%;" 
+                                placeholder="Edit your SP logic here..."></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="button" class="btn btn-light btn-modern px-4" onclick="copyMagicScript()">
+                                <i class="bi bi-clipboard me-1"></i> Copy Script
+                            </button>
+                            <button type="button" class="btn btn-info text-white btn-modern px-5 shadow-sm" id="btnMagicExecute" onclick="executeAndSyncSP()">
+                                <i class="bi bi-cloud-arrow-up me-1"></i> Create SP & Sync to Config
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     <script type="text/javascript">
+        let currentMagicConfigId = 0;
+
+        function quickGenerateSP(id, query, targetDb, fileName) {
+            currentMagicConfigId = id;
+            $('#txtMagicTargetDB').val(targetDb || '(Default DB)');
+            
+            // Propose name: usp_Upload + CleanFileName
+            let cleanName = fileName.replace('.txt', '').replace(/[^a-zA-Z0-9]/g, '');
+            $('#txtMagicSPName').val('usp_Upload' + cleanName);
+
+            showLoading('Generating SP...', 'Analyzing query schema and data types');
+
+            $.ajax({
+                type: "POST",
+                url: '<%= ResolveUrl("~/Maintenance.aspx/QuickGenerateSP") %>',
+                data: JSON.stringify({ query: query, targetDb: targetDb, spName: $('#txtMagicSPName').val() }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (r) {
+                    Swal.close();
+                    if (r.d.success) {
+                        $('#txtMagicResult').val(r.d.script);
+                        var modal = new bootstrap.Modal(document.getElementById('spPreviewModal'));
+                        modal.show();
+                    } else {
+                        showAlert('Error', r.d.message, 'error');
+                    }
+                },
+                error: function () {
+                    Swal.close();
+                    showAlert('Error', 'Failed to communicate with server', 'error');
+                }
+            });
+        }
+
+        function copyMagicScript() {
+            const txt = document.getElementById('txtMagicResult');
+            txt.select();
+            navigator.clipboard.writeText(txt.value);
+            showAlert('Success', 'Script copied!', 'success');
+        }
+
+        function executeAndSyncSP() {
+            const script = $('#txtMagicResult').val();
+            const spName = $('#txtMagicSPName').val();
+            const targetDb = $('#txtMagicTargetDB').val();
+
+            if (!script || !spName) return;
+
+            showLoading('Creating SP...', 'Executing script and updating configuration');
+
+            $.ajax({
+                type: "POST",
+                url: '<%= ResolveUrl("~/Maintenance.aspx/ExecuteAndSyncSP") %>',
+                data: JSON.stringify({ script: script, spName: spName, targetDb: targetDb === '(Default DB)' ? '' : targetDb, configId: currentMagicConfigId }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (r) {
+                    Swal.close();
+                    if (r.d.success) {
+                        var modalEl = document.getElementById('spPreviewModal');
+                        var modal = bootstrap.Modal.getInstance(modalEl);
+                        modal.hide();
+                        
+                        showAlert('Magic Success!', 'SP created and Config synchronized.', 'success');
+                        // Refresh grid to show new SP Name
+                        setTimeout(() => { window.location.reload(); }, 1500);
+                    } else {
+                        showAlert('Error', r.d.message, 'error');
+                    }
+                },
+                error: function () {
+                    hideLoading();
+                    showAlert('Error', 'Failed to execute script', 'error');
+                }
+            });
+        }
+
         function resetAndShow() {
             document.getElementById('<%= hfID.ClientID %>').value = "0";
             document.getElementById('<%= txtFileName.ClientID %>').value = "";

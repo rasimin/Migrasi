@@ -420,6 +420,7 @@
                             <ul class="dropdown-menu border-0 shadow-sm rounded-3 dropdown-menu-end" aria-labelledby="devToolsDropdown">
                                 <li><a class="dropdown-item py-2" runat="server" href="~/SPGenerator"><i class="bi bi-code-square me-2 text-info"></i>SP Maker</a></li>
                                 <li><a class="dropdown-item py-2" runat="server" href="~/Query"><i class="bi bi-terminal me-2 text-primary"></i>Query Runner</a></li>
+                                <li><a class="dropdown-item py-2" runat="server" href="~/DatabaseSearch"><i class="bi bi-search me-2 text-primary"></i>Object Search</a></li>
                             </ul>
                         </li>
 
