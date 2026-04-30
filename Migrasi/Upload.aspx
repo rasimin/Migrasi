@@ -64,6 +64,11 @@
                                                 <asp:Literal ID="litStatus" runat="server"></asp:Literal>
                                             </ItemTemplate>
                                         </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Error Message">
+                                            <ItemTemplate>
+                                                <asp:Literal ID="litError" runat="server"></asp:Literal>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
                                     </Columns>
                                 </asp:GridView>
                             </div>
@@ -133,14 +138,22 @@
     <script>
         function showFullRowDetail(btn) {
             const data = $(btn);
+            
+            // Helper to decode HTML entities from attributes
+            const decode = (str) => {
+                const txt = document.createElement("textarea");
+                txt.innerHTML = str;
+                return txt.value;
+            };
+
             $('#modalStatusBadge').html(data.attr('data-status-badge'));
             $('#modalSPName').text(data.attr('data-sp'));
-            $('#modalSQL').text(data.attr('data-script'));
-            $('#modalRaw').text(data.attr('data-raw'));
+            $('#modalSQL').text(decode(data.attr('data-script')));
+            $('#modalRaw').text(decode(data.attr('data-raw')));
             
             const error = data.attr('data-error');
             if (error && error.trim() !== "") {
-                $('#modalError').text(error);
+                $('#modalError').text(decode(error));
                 $('#modalErrorContainer').removeClass('d-none');
             } else {
                 $('#modalErrorContainer').addClass('d-none');

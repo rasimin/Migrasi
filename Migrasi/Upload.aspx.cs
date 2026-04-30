@@ -19,6 +19,7 @@ namespace Migrasi
         protected global::System.Web.UI.WebControls.Panel pnlSummary;
         protected global::System.Web.UI.WebControls.Literal litSuccessCount;
         protected global::System.Web.UI.WebControls.Literal litFailedCount;
+        protected global::System.Web.UI.WebControls.Literal litError;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -85,6 +86,11 @@ namespace Migrasi
                     dt.Columns.Add(header.Trim());
                 }
 
+                // Add tracking columns for internal use
+                if (!dt.Columns.Contains("_Status")) dt.Columns.Add("_Status");
+                if (!dt.Columns.Contains("_Error")) dt.Columns.Add("_Error");
+                if (!dt.Columns.Contains("_Script")) dt.Columns.Add("_Script");
+
                 while (!sr.EndOfStream)
                 {
                     string rowsLine = sr.ReadLine();
@@ -92,7 +98,14 @@ namespace Migrasi
                     {
                         string[] rows = rowsLine.Split('|');
                         if (rows.Length == headers.Length)
-                            dt.Rows.Add(rows);
+                        {
+                            DataRow dr = dt.NewRow();
+                            for (int i = 0; i < rows.Length; i++)
+                            {
+                                dr[i] = rows[i];
+                            }
+                            dt.Rows.Add(dr);
+                        }
                     }
                 }
             }
@@ -318,6 +331,7 @@ namespace Migrasi
                 string raw = string.Join("|", row.Row.ItemArray.Take(row.Row.ItemArray.Length - trackingCols));
 
                 Literal litStatus = (Literal)e.Row.FindControl("litStatus");
+                Literal litError = (Literal)e.Row.FindControl("litError");
                 var btnView = (System.Web.UI.HtmlControls.HtmlButton)e.Row.FindControl("btnViewDetail");
 
                 if (!string.IsNullOrEmpty(status))
@@ -325,12 +339,17 @@ namespace Migrasi
                     string badgeClass = status == "SUCCESS" ? "bg-success-subtle text-success border border-success" : "bg-danger-subtle text-danger border border-danger";
                     litStatus.Text = $"<span class='badge {badgeClass} px-2 py-1 small fw-bold'>{status}</span>";
                     
+                    if (status == "FAILED" && !string.IsNullOrEmpty(error))
+                    {
+                        litError.Text = $"<div class='text-danger small text-truncate' style='max-width: 250px;' title='{HttpUtility.HtmlEncode(error)}'>{error}</div>";
+                    }
+
                     btnView.Style["display"] = "inline-block";
                     btnView.Attributes["data-status"] = status;
                     btnView.Attributes["data-status-badge"] = litStatus.Text;
-                    btnView.Attributes["data-error"] = HttpUtility.HtmlAttributeEncode(error);
-                    btnView.Attributes["data-script"] = HttpUtility.HtmlAttributeEncode(script);
-                    btnView.Attributes["data-raw"] = HttpUtility.HtmlAttributeEncode(raw);
+                    btnView.Attributes["data-error"] = error;
+                    btnView.Attributes["data-script"] = script;
+                    btnView.Attributes["data-raw"] = raw;
                     btnView.Attributes["data-sp"] = ddlConfig.SelectedValue;
                 }
                 
