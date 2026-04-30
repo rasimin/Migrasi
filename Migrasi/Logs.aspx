@@ -13,34 +13,36 @@
                             </div>
                             <div class="d-flex flex-wrap gap-2 align-items-center justify-content-md-end">
                                 <div class="d-flex flex-column">
-                                    <label class="x-small fw-bold text-uppercase text-muted mb-1" style="font-size: 0.65rem;">Date Range</label>
-                                    <div class="d-flex align-items-center gap-1">
-                                        <asp:TextBox ID="txtStartDate" runat="server" CssClass="form-control form-control-sm" TextMode="Date" style="width: 135px;"></asp:TextBox>
+                                    <label class="x-small fw-bold text-uppercase text-muted mb-1 ms-2" style="font-size: 0.65rem;">Date Range</label>
+                                    <div class="d-flex align-items-center gap-1 border rounded-pill bg-white px-2 py-0">
+                                        <asp:TextBox ID="txtStartDate" runat="server" CssClass="form-control form-control-sm border-0 shadow-none bg-transparent" TextMode="Date" style="width: 125px; font-size: 0.8rem;"></asp:TextBox>
                                         <span class="text-muted small">-</span>
-                                        <asp:TextBox ID="txtEndDate" runat="server" CssClass="form-control form-control-sm" TextMode="Date" style="width: 135px;"></asp:TextBox>
+                                        <asp:TextBox ID="txtEndDate" runat="server" CssClass="form-control form-control-sm border-0 shadow-none bg-transparent" TextMode="Date" style="width: 125px; font-size: 0.8rem;"></asp:TextBox>
                                     </div>
                                 </div>
                                 <div class="d-flex flex-column">
-                                    <label class="x-small fw-bold text-uppercase text-muted mb-1" style="font-size: 0.65rem;">Search Keywords</label>
-                                    <div class="input-group input-group-sm" style="width: 220px;">
-                                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                                        <asp:TextBox ID="txtSearch" runat="server" CssClass="form-control border-start-0" placeholder="File, script, raw..."></asp:TextBox>
+                                    <label class="x-small fw-bold text-uppercase text-muted mb-1 ms-2" style="font-size: 0.65rem;">Search Keywords</label>
+                                    <div class="input-group input-group-sm border rounded-pill overflow-hidden bg-white px-2 py-0" style="width: 220px;">
+                                        <span class="input-group-text bg-transparent border-0 pe-1"><i class="bi bi-search text-muted small"></i></span>
+                                        <asp:TextBox ID="txtSearch" runat="server" CssClass="form-control border-0 shadow-none bg-transparent" placeholder="File, script, raw..." style="font-size: 0.85rem;"></asp:TextBox>
                                     </div>
                                 </div>
                                 <div class="d-flex flex-column">
-                                    <label class="x-small fw-bold text-uppercase text-muted mb-1" style="font-size: 0.65rem;">Status</label>
-                                    <asp:DropDownList ID="ddlStatusFilter" runat="server" CssClass="form-select form-select-sm" style="width: 110px;">
-                                        <asp:ListItem Text="All Status" Value=""></asp:ListItem>
-                                        <asp:ListItem Text="Success" Value="SUCCESS"></asp:ListItem>
-                                        <asp:ListItem Text="Failed" Value="FAILED"></asp:ListItem>
-                                    </asp:DropDownList>
+                                    <label class="x-small fw-bold text-uppercase text-muted mb-1 ms-2" style="font-size: 0.65rem;">Status</label>
+                                    <div class="border rounded-pill bg-white px-2 py-0">
+                                        <asp:DropDownList ID="ddlStatusFilter" runat="server" CssClass="form-select form-select-sm border-0 shadow-none bg-transparent fw-bold text-secondary" style="width: 110px; font-size: 0.8rem;">
+                                            <asp:ListItem Text="All Status" Value=""></asp:ListItem>
+                                            <asp:ListItem Text="Success" Value="SUCCESS"></asp:ListItem>
+                                            <asp:ListItem Text="Failed" Value="FAILED"></asp:ListItem>
+                                        </asp:DropDownList>
+                                    </div>
                                 </div>
                                 <div class="d-flex align-items-end pt-3">
-                                    <div class="btn-group shadow-sm">
-                                        <asp:LinkButton ID="btnFilter" runat="server" CssClass="btn btn-primary btn-sm px-3" OnClick="btnFilter_Click">
+                                    <div class="btn-group shadow-sm rounded-pill overflow-hidden border">
+                                        <asp:LinkButton ID="btnFilter" runat="server" CssClass="btn btn-primary btn-sm px-3 border-0" OnClick="btnFilter_Click">
                                             <i class="bi bi-funnel-fill me-1"></i>Apply
                                         </asp:LinkButton>
-                                        <asp:LinkButton ID="btnClearLogs" runat="server" CssClass="btn btn-outline-danger btn-sm" OnClick="btnClearLogs_Click" OnClientClick="return confirm('Delete ALL logs?');">
+                                        <asp:LinkButton ID="btnClearLogs" runat="server" CssClass="btn btn-white btn-sm text-danger border-0 border-start" OnClick="btnClearLogs_Click" OnClientClick="return confirm('Delete ALL logs?');">
                                             <i class="bi bi-trash"></i>
                                         </asp:LinkButton>
                                     </div>
@@ -60,10 +62,10 @@
                                                 data-id='<%# Eval("ID") %>'
                                                 data-date='<%# Eval("CreatedAt", "{0:yyyy-MM-dd HH:mm:ss}") %>'
                                                 data-filename='<%# Eval("FileName") %>'
-                                                data-script='<%# Eval("ScriptExecuted") %>'
+                                                data-script='<%# HttpUtility.HtmlAttributeEncode(Eval("ScriptExecuted").ToString()) %>'
                                                 data-status='<%# Eval("Status") %>'
-                                                data-raw='<%# Eval("RawData") %>'
-                                                data-error='<%# Eval("ErrorMessage") %>'>
+                                                data-raw='<%# HttpUtility.HtmlAttributeEncode(Eval("RawData").ToString()) %>'
+                                                data-error='<%# HttpUtility.HtmlAttributeEncode(Eval("ErrorMessage").ToString()) %>'>
                                                 <i class="bi bi-eye me-1"></i>View
                                             </button>
                                         </ItemTemplate>
@@ -137,6 +139,7 @@
     RawData VARCHAR(MAX),
     Status VARCHAR(20),
     ErrorMessage VARCHAR(MAX),
+    ScriptExecuted VARCHAR(MAX),
     CreatedAt DATETIME DEFAULT GETDATE()
 );</div>
                 </div>

@@ -74,21 +74,45 @@ namespace Migrasi
                     {
                         string colName = headers[i].Trim().Replace(" ", "_");
                         
-                        // Find a non-empty sample for this column across all rows
-                        string bestSample = "";
-                        foreach (var row in allRows)
+                        // Scan all rows to find the most conservative data type
+                        HashSet<string> typesFound = new HashSet<string>();
+                        
+                        // Limit scan to first 500 rows for performance, but thorough enough
+                        int scanLimit = Math.Min(allRows.Count, 500);
+                        for (int r = 0; r < scanLimit; r++)
                         {
+                            var row = allRows[r];
                             if (row.Length > i && !string.IsNullOrWhiteSpace(row[i]))
                             {
-                                bestSample = row[i];
-                                break; // Found first non-null data
+                                typesFound.Add(GuessDataType(row[i]));
                             }
                         }
 
-                        string dataType = GuessDataType(bestSample);
+                        string finalType = "VARCHAR(500)";
+                        if (typesFound.Count == 0)
+                        {
+                            finalType = "VARCHAR(500)";
+                        }
+                        else if (typesFound.Contains("VARCHAR(500)"))
+                        {
+                            finalType = "VARCHAR(500)";
+                        }
+                        else if (typesFound.Contains("DATETIME"))
+                        {
+                            // Mix of DATETIME and numbers usually means VARCHAR
+                            finalType = typesFound.Count == 1 ? "DATETIME" : "VARCHAR(500)";
+                        }
+                        else if (typesFound.Contains("DECIMAL(18, 4)"))
+                        {
+                            finalType = "DECIMAL(18, 4)";
+                        }
+                        else if (typesFound.Contains("INT"))
+                        {
+                            finalType = "INT";
+                        }
                         
                         string comma = (i == headers.Length - 1) ? "" : ",";
-                        sb.AppendLine($"    @{colName} {dataType}{comma}");
+                        sb.AppendLine($"    @{colName} {finalType}{comma}");
                     }
 
                     sb.AppendLine("AS");

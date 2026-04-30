@@ -1,9 +1,8 @@
 // ===== Mapping Modal Logic =====
 let mappingModal;
 let currentTargetDb = "";
-let fileColumns = [];     // columns parsed from uploaded TXT
+let fileColumns = [];     // columns parsed from uploaded TXT (if any)
 let spParams = [];        // SP parameters loaded from server
-let sampleRows = [];      // sample data rows from TXT
 
 $(document).ready(function () {
     const el = document.getElementById('mappingModal');
@@ -17,12 +16,7 @@ function openMappingModal(id, spName, targetDb) {
     currentTargetDb = targetDb || "";
     fileColumns = [];
     spParams = [];
-    sampleRows = [];
-    $('#samplePreview').addClass('d-none');
-    $('#btnAutoMatch').prop('disabled', true);
-    $('#btnSaveMapping').prop('disabled', true);
-    $('#mappingStats').addClass('d-none');
-    document.getElementById('sampleFile').value = '';
+    document.getElementById('mappingStats').classList.add('d-none');
     loadSPParameters(spName, targetDb, id);
     mappingModal.show();
 }
@@ -119,134 +113,15 @@ function clearAllMappings() {
     updateMappingStats();
 }
 
-// === Read Sample File ===
-function readSampleFile(input) {
-    if (!input.files || !input.files[0]) return;
-    var reader = new FileReader();
-    reader.onload = function (e) {
-        var lines = e.target.result.split('\n').filter(function (l) { return l.trim() !== ""; });
-        if (lines.length === 0) { showAlert('Empty', 'The file appears to be empty.', 'warning'); return; }
-        fileColumns = lines[0].split('|').map(function (c) { return c.trim(); }).filter(function (c) { return c !== ""; });
-        // Parse sample rows (up to 5)
-        sampleRows = [];
-        for (var i = 1; i < Math.min(lines.length, 6); i++) {
-            sampleRows.push(lines[i].split('|').map(function (c) { return c.trim(); }));
-        }
-        // Show sample preview
-        var headHtml = ''; fileColumns.forEach(function (c) { headHtml += '<th class="text-nowrap">' + escHtml(c) + '</th>'; });
-        $('#sampleHead').html(headHtml);
-        var bodyHtml = ''; sampleRows.forEach(function (row) {
-            bodyHtml += '<tr>'; row.forEach(function (cell) { bodyHtml += '<td class="text-nowrap">' + escHtml(cell) + '</td>'; }); bodyHtml += '</tr>';
-        });
-        $('#sampleBody').html(bodyHtml);
-        $('#sampleRowCount').text((lines.length - 1) + ' total rows');
-        $('#samplePreview').removeClass('d-none');
-        // Re-render mapping table with column options
-        if (spParams.length > 0) renderMappingTable();
-        $('#btnAutoMatch').prop('disabled', spParams.length === 0);
-    };
-    reader.readAsText(input.files[0]);
-}
-
 // === No SP UI ===
 function showNoSPUI(spName, configId) {
     var displayName = (!spName || spName.trim() === "") ? "—" : spName;
     var html = '<div class="text-center py-5"><div class="sp-gen-card card border-0 shadow rounded-4 p-5" style="background:var(--bg-card);">';
     html += '<i class="bi bi-database-exclamation fs-1 text-warning mb-3 d-block"></i>';
     html += '<h5 class="fw-bold">Stored Procedure Not Found</h5>';
-    html += '<p class="text-secondary small mb-4">SP "<b>' + escHtml(displayName) + '</b>" is missing or not configured.<br/>Upload a sample TXT, then generate and execute the SP automatically.</p>';
-    // Step indicators
-    html += '<div class="row g-3 text-start mb-4">';
-    html += '<div class="col-4"><div class="p-3 rounded-3" style="background:var(--table-header);"><div class="fw-bold small text-primary mb-1"><i class="bi bi-1-circle me-1"></i>Upload</div><div class="text-muted" style="font-size:0.75rem;">Upload a sample TXT file</div></div></div>';
-    html += '<div class="col-4"><div class="p-3 rounded-3" style="background:var(--table-header);"><div class="fw-bold small text-primary mb-1"><i class="bi bi-2-circle me-1"></i>Generate</div><div class="text-muted" style="font-size:0.75rem;">Auto-generate SP script</div></div></div>';
-    html += '<div class="col-4"><div class="p-3 rounded-3" style="background:var(--table-header);"><div class="fw-bold small text-primary mb-1"><i class="bi bi-3-circle me-1"></i>Execute</div><div class="text-muted" style="font-size:0.75rem;">Create in DB & map</div></div></div>';
-    html += '</div>';
-    html += '<button type="button" class="btn btn-warning btn-modern px-4 shadow-sm" onclick="generateSPTemplate()"><i class="bi bi-file-earmark-code me-2"></i>Generate SP Script</button>';
+    html += '<p class="text-secondary small mb-0">SP "<b>' + escHtml(displayName) + '</b>" is missing or not configured.<br/>Please ensure the SP exists in the target database.</p>';
     html += '</div></div>';
     $('#mappingContent').html(html);
-}
-
-// === Generate SP Template ===
-function generateSPTemplate() {
-    if (fileColumns.length === 0) { showAlert('Wait', 'Please upload a sample TXT file first!', 'warning'); return; }
-    var spName = $('#mapSPName').text().trim();
-    if (!spName || spName === '—') {
-        Swal.fire({
-            title: 'Enter SP Name', input: 'text',
-            inputLabel: 'Name for your Stored Procedure:',
-            inputPlaceholder: 'e.g., usp_InsertMyData',
-            showCancelButton: true, confirmButtonColor: '#0ea5e9',
-            didOpen: function () { setTimeout(function () { Swal.getInput().focus(); }, 100); },
-            inputValidator: function (v) {
-                if (!v || !v.trim()) return 'Required!';
-                if (v.includes(' ')) return 'No spaces allowed!';
-                if (/[^a-zA-Z0-9_]/.test(v.trim())) return 'Only letters, numbers, underscores!';
-            }
-        }).then(function (r) {
-            if (r.isConfirmed && r.value) { spName = r.value.trim(); $('#mapSPName').text(spName); showGeneratedSQL(spName); }
-        });
-    } else { showGeneratedSQL(spName); }
-}
-
-function showGeneratedSQL(spName) {
-    var sql = 'CREATE PROCEDURE [dbo].[' + spName + ']\n';
-    fileColumns.forEach(function (col, i) {
-        var pn = col.replace(/ /g, '_');
-        
-        // Guess data type based on sampleRows
-        var bestSample = "";
-        for (var r = 0; r < sampleRows.length; r++) {
-            if (sampleRows[r][i] && sampleRows[r][i].trim() !== "") {
-                bestSample = sampleRows[r][i].trim();
-                break;
-            }
-        }
-        
-        var dataType = guessJSType(bestSample);
-        sql += '    @' + pn + ' ' + dataType + (i < fileColumns.length - 1 ? ',' : '') + '\n';
-    });
-    sql += 'AS\nBEGIN\n    SET NOCOUNT ON;\n    -- Auto-generated by Ingestion System\nEND';
-
-    Swal.fire({
-        title: '<strong>Generated SP Script</strong>', icon: 'info',
-        html: '<p class="small text-start text-muted mb-2">Target: <b>' + spName + '</b> in <b>' + (currentTargetDb || 'Default DB') + '</b></p>' +
-              '<textarea id="genSQL" class="form-control font-monospace small" style="height:220px;background:#1e293b;color:#10b981;border:none;padding:12px;" readonly>' + sql + '</textarea>',
-        showCloseButton: true, showDenyButton: true,
-        confirmButtonText: '<i class="bi bi-magic me-2"></i>Execute & Create',
-        denyButtonText: '<i class="bi bi-clipboard me-2"></i>Copy Only',
-        confirmButtonColor: '#0ea5e9', denyButtonColor: '#64748b'
-    }).then(function (r) {
-        if (r.isConfirmed) executeCreateSP(spName);
-        else if (r.isDenied) { navigator.clipboard.writeText(sql); Swal.fire('Copied!', '', 'success'); }
-    });
-}
-
-// === Execute Create SP + Update Config ===
-function executeCreateSP(spName) {
-    var configId = parseInt($('#mapConfigID').text());
-    Swal.fire({ title: 'Creating SP...', text: 'Please wait...', allowOutsideClick: false, showConfirmButton: false, didOpen: function () { Swal.showLoading(); } });
-
-    $.ajax({
-        type: "POST", url: "Maintenance.aspx/CreateSPAndUpdateConfig",
-        data: JSON.stringify({ spName: spName, targetDb: currentTargetDb || "", columns: fileColumns.join(','), configId: configId }),
-        contentType: "application/json; charset=utf-8", dataType: "json",
-        success: function (r) {
-            Swal.close();
-            var res = r.d;
-            if (res.success) {
-                showAlert('Success', res.message, 'success');
-                $('#mapSPName').text(spName);
-                // Reload SP params to show mapping table
-                loadSPParameters(spName, currentTargetDb, configId);
-            } else { showAlert('Error', res.message, 'error'); }
-        },
-        error: function (xhr) {
-            Swal.close();
-            var msg = 'Request failed';
-            try { msg = JSON.parse(xhr.responseText).Message || msg; } catch (e) { }
-            showAlert('Error', msg, 'error');
-        }
-    });
 }
 
 // === Save Mapping ===
@@ -270,24 +145,4 @@ function saveMapping() {
     });
 }
 
-// === Helpers ===
 function escHtml(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
-function guessJSType(sample) {
-    if (!sample || sample.trim() === "") return "VARCHAR(500)";
-    sample = sample.trim();
-
-    // Check Numeric
-    if (!isNaN(sample) && !isNaN(parseFloat(sample))) {
-        if (sample.indexOf('.') > -1) return "DECIMAL(18, 4)";
-        return "INT";
-    }
-
-    // Check Date (Simple check)
-    var dateRegex = /^\d{4}-\d{2}-\d{2}/; // basic YYYY-MM-DD
-    if (dateRegex.test(sample) || !isNaN(Date.parse(sample))) {
-        return "DATETIME";
-    }
-
-    return "VARCHAR(500)";
-}

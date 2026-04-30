@@ -15,6 +15,11 @@ namespace Migrasi
     {
         string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
 
+        protected global::System.Web.UI.WebControls.Panel pnlExecution;
+        protected global::System.Web.UI.WebControls.Panel pnlSummary;
+        protected global::System.Web.UI.WebControls.Literal litSuccessCount;
+        protected global::System.Web.UI.WebControls.Literal litFailedCount;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -280,7 +285,19 @@ namespace Migrasi
             
             ShowAlert(resultMsg, errorCount > 0 ? "warning" : "success");
             
-            // We no longer hide the previewArea immediately so user can see row-level results
+            litSuccessCount.Text = successCount.ToString();
+            litFailedCount.Text = errorCount.ToString();
+            pnlExecution.Visible = false;
+            pnlSummary.Visible = true;
+        }
+
+        protected void btnReset_Click(object sender, EventArgs e)
+        {
+            previewArea.Visible = false;
+            pnlExecution.Visible = true;
+            pnlSummary.Visible = false;
+            ViewState["UploadData"] = null;
+            lblTotal.Text = "";
         }
 
         protected void gvUploadPreview_RowDataBound(object sender, GridViewRowEventArgs e)
@@ -311,9 +328,9 @@ namespace Migrasi
                     btnView.Style["display"] = "inline-block";
                     btnView.Attributes["data-status"] = status;
                     btnView.Attributes["data-status-badge"] = litStatus.Text;
-                    btnView.Attributes["data-error"] = error;
-                    btnView.Attributes["data-script"] = script;
-                    btnView.Attributes["data-raw"] = raw;
+                    btnView.Attributes["data-error"] = HttpUtility.HtmlAttributeEncode(error);
+                    btnView.Attributes["data-script"] = HttpUtility.HtmlAttributeEncode(script);
+                    btnView.Attributes["data-raw"] = HttpUtility.HtmlAttributeEncode(raw);
                     btnView.Attributes["data-sp"] = ddlConfig.SelectedValue;
                 }
                 

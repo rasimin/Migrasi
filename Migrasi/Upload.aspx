@@ -26,12 +26,25 @@
                         </div>
 
                         <div id="previewArea" runat="server" visible="false" class="mt-5">
-                            <div class="d-flex justify-content-between align-items-center mb-4 border-start border-primary border-4 ps-3">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 border-start border-primary border-4 ps-3">
                                 <div>
                                     <h5 class="mb-0 text-dark fw-bold">Analysis Results</h5>
                                     <p class="text-secondary small mb-0">Review the mapped data before committing to database</p>
                                 </div>
-                                <asp:Label ID="lblTotal" runat="server" CssClass="badge rounded-pill text-primary fw-bold px-3 py-2"></asp:Label>
+                                <div class="d-flex flex-wrap gap-2 align-items-center">
+                                    <div class="input-group input-group-sm border rounded-pill overflow-hidden bg-white px-2 py-0" style="width: 220px; transition: all 0.3s;">
+                                        <span class="input-group-text bg-transparent border-0 pe-1"><i class="bi bi-search text-muted small"></i></span>
+                                        <input type="text" id="gridSearch" class="form-control border-0 shadow-none bg-transparent" placeholder="Search grid..." onkeyup="filterPreviewGrid()" style="font-size: 0.85rem;" />
+                                    </div>
+                                    <div class="border rounded-pill bg-white px-2 py-0">
+                                        <select id="gridStatusFilter" class="form-select form-select-sm border-0 shadow-none bg-transparent fw-bold text-secondary" style="width: 120px; font-size: 0.8rem;" onchange="filterPreviewGrid()">
+                                            <option value="">All Status</option>
+                                            <option value="SUCCESS">Success</option>
+                                            <option value="FAILED">Failed</option>
+                                        </select>
+                                    </div>
+                                    <asp:Label ID="lblTotal" runat="server" CssClass="badge rounded-pill text-primary fw-bold px-3 py-2 bg-primary-subtle border border-primary-subtle"></asp:Label>
+                                </div>
                             </div>
                             
                             <div class="table-responsive rounded-3 border" style="max-height: 450px; overflow-y: auto;">
@@ -144,12 +157,67 @@
                 toast.fire({ icon: 'success', title: label + ' copied to clipboard' });
             });
         }
+
+        function filterPreviewGrid() {
+            const searchText = $('#gridSearch').val().toLowerCase();
+            const statusFilter = $('#gridStatusFilter').val().toUpperCase();
+            
+            $("#<%= gvUploadPreview.ClientID %> tr").each(function(index) {
+                if (index === 0) return; // Skip header
+                
+                const rowText = $(this).text().toLowerCase();
+                const statusBadge = $(this).find('.badge').text().toUpperCase();
+                
+                const matchesSearch = rowText.includes(searchText);
+                const matchesStatus = statusFilter === "" || statusBadge.includes(statusFilter);
+                
+                if (matchesSearch && matchesStatus) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
     </script>
 
-                            <div class="mt-5 text-center p-4 rounded-4" style="background-color: var(--bg-body); border: 1px dashed var(--primary-blue);">
-                                <p class="text-success small fw-bold mb-3"><i class="bi bi-check-circle-fill me-2"></i>Data analysis complete. Ready for ingestion.</p>
-                                <asp:Button ID="btnProcessUpload" runat="server" Text="Execute Database Upload" CssClass="btn btn-success btn-modern px-5 shadow-sm" OnClick="btnProcessUpload_Click" OnClientClick="return confirmDelete(this, 'Process this data to Database?');" />
-                            </div>
+                            <asp:Panel ID="pnlExecution" runat="server">
+                                <div class="mt-5 text-center p-4 rounded-4" style="background-color: var(--bg-body); border: 1px dashed var(--primary-blue);">
+                                    <p class="text-success small fw-bold mb-3"><i class="bi bi-check-circle-fill me-2"></i>Data analysis complete. Ready for ingestion.</p>
+                                    <asp:Button ID="btnProcessUpload" runat="server" Text="Execute Database Upload" CssClass="btn btn-success btn-modern px-5 shadow-sm" OnClick="btnProcessUpload_Click" OnClientClick="return confirm('Process this data to Database?');" />
+                                </div>
+                            </asp:Panel>
+
+                            <asp:Panel ID="pnlSummary" runat="server" Visible="false" CssClass="mt-5 pt-4 border-top">
+                                <div class="row justify-content-center g-3 mb-4">
+                                    <div class="col-md-3">
+                                        <div class="card border-0 shadow-sm rounded-4 bg-success bg-opacity-10 h-100">
+                                            <div class="card-body p-3 text-center">
+                                                <div class="text-success small fw-bold text-uppercase mb-1">Success</div>
+                                                <h3 class="fw-bold text-success mb-0"><asp:Literal ID="litSuccessCount" runat="server">0</asp:Literal></h3>
+                                                <div class="text-success opacity-75 x-small">Rows Ingested</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card border-0 shadow-sm rounded-4 bg-danger bg-opacity-10 h-100">
+                                            <div class="card-body p-3 text-center">
+                                                <div class="text-danger small fw-bold text-uppercase mb-1">Failed</div>
+                                                <h3 class="fw-bold text-danger mb-0"><asp:Literal ID="litFailedCount" runat="server">0</asp:Literal></h3>
+                                                <div class="text-danger opacity-75 x-small">Errors Occurred</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="alert alert-info border-0 rounded-4 p-3 d-inline-block mb-3 shadow-sm">
+                                        <i class="bi bi-info-circle me-2"></i><b>Ingestion Completed.</b> See grid for per-row status.
+                                    </div>
+                                    <br />
+                                    <asp:LinkButton ID="btnReset" runat="server" CssClass="btn btn-outline-secondary btn-modern px-4" OnClick="btnReset_Click">
+                                        <i class="bi bi-arrow-clockwise me-2"></i>Upload Another File
+                                    </asp:LinkButton>
+                                </div>
+                            </asp:Panel>
                         </div>
                     </div>
                 </div>
