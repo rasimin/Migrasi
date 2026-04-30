@@ -31,9 +31,14 @@
                         <div id="resultArea" runat="server" visible="false" class="mt-4">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="text-secondary fw-bold mb-0">Generated SQL Script</h6>
-                                <button type="button" class="btn btn-light btn-sm px-3" onclick="copyToClipboard()">
-                                    <i class="bi bi-clipboard me-1"></i> Copy Script
-                                </button>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-light btn-sm px-3" onclick="copyToClipboard()">
+                                        <i class="bi bi-clipboard me-1"></i> Copy Script
+                                    </button>
+                                    <button type="button" class="btn btn-outline-info btn-sm px-3" onclick="openInQueryRunner()">
+                                        <i class="bi bi-terminal me-1"></i> Open in Query Runner
+                                    </button>
+                                </div>
                             </div>
                             <div class="bg-dark rounded-4 shadow-inner overflow-hidden" style="position: relative; width: 100%;">
                                 <asp:TextBox ID="txtResult" runat="server" TextMode="MultiLine" 
@@ -54,6 +59,13 @@
             copyText.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(copyText.value);
             showAlert('Success', 'Script copied to clipboard!', 'success');
+        }
+
+        function openInQueryRunner() {
+            const script = document.getElementById('<%= txtResult.ClientID %>').value;
+            if (!script) return;
+            sessionStorage.setItem('pendingSQL', script);
+            window.location.href = 'Query.aspx';
         }
     </script>
 </asp:Content>

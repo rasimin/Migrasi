@@ -107,6 +107,18 @@
     </style>
 
     <script>
+        $(document).ready(function() {
+            const pendingSQL = sessionStorage.getItem('pendingSQL');
+            if (pendingSQL) {
+                const editor = document.getElementById('<%= txtQuery.ClientID %>');
+                if (editor) {
+                    editor.value = pendingSQL;
+                    sessionStorage.removeItem('pendingSQL');
+                    showAlert('SQL Loaded', 'Generated script has been loaded from SP Maker', 'info');
+                }
+            }
+        });
+
         function switchTab(tabId) {
             var triggerEl = document.querySelector('#' + tabId);
             if (triggerEl) {
