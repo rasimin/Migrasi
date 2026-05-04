@@ -62,8 +62,13 @@
                 <i class="bi bi-info-circle-fill fs-5 me-2"></i>
                 <h6 class="mb-0 fw-bold">Required SQL Table Setup</h6>
             </div>
-            <p class="mb-2 small">Before using this feature, please ensure this table exists in your <strong>SimulasiDB</strong> database:</p>
-            <div class="bg-dark text-success p-3 rounded font-monospace small" style="white-space: pre;">CREATE TABLE TMappingPadanan (
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <p class="mb-0 small">Before using this feature, please ensure this table exists in your <strong>SimulasiDB</strong> database:</p>
+                <button type="button" class="btn btn-sm btn-outline-info border-0" onclick="copyToClipboard('sqlSetupMapping')">
+                    <i class="bi bi-copy me-1"></i> Copy Script
+                </button>
+            </div>
+            <div id="sqlSetupMapping" class="bg-dark text-success p-3 rounded font-monospace small" style="white-space: pre;">CREATE TABLE TMappingPadanan (
     id INT IDENTITY(1,1) PRIMARY KEY,
     MappingKey VARCHAR(255) NOT NULL,
     FromCode VARCHAR(255) NOT NULL,

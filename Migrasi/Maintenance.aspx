@@ -78,8 +78,13 @@
 
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="text-secondary small mb-1 fw-bold">1. Configuration Table</div>
-                        <div class="bg-dark text-success p-3 rounded font-monospace"
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div class="text-secondary small fw-bold">1. Configuration Table</div>
+                            <button type="button" class="btn btn-sm btn-link text-info p-0 text-decoration-none" onclick="copyToClipboard('sqlMaintConfig')">
+                                <i class="bi bi-copy small me-1"></i>Copy
+                            </button>
+                        </div>
+                        <div id="sqlMaintConfig" class="bg-dark text-success p-3 rounded font-monospace"
                             style="white-space: pre; font-size: 0.7rem; line-height: 1.2;">CREATE TABLE
                             T_MaintenanceGenerate (
                             ID INT IDENTITY(1,1) PRIMARY KEY,
@@ -87,12 +92,18 @@
                             GenerateType VARCHAR(50) DEFAULT 'SP',
                             NamaSPGenerate VARCHAR(MAX) NOT NULL,
                             NamaSPUpload VARCHAR(255) NULL,
-                            TargetDB VARCHAR(255) NULL
+                            TargetDB VARCHAR(255) NULL,
+                            CreatedAt DATETIME DEFAULT GETDATE()
                             );</div>
                     </div>
                     <div class="col-md-6">
-                        <div class="text-secondary small mb-1 fw-bold">2. Upload Log Table</div>
-                        <div class="bg-dark text-info p-3 rounded font-monospace"
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div class="text-secondary small fw-bold">2. Upload Log Table</div>
+                            <button type="button" class="btn btn-sm btn-link text-info p-0 text-decoration-none" onclick="copyToClipboard('sqlMaintLog')">
+                                <i class="bi bi-copy small me-1"></i>Copy
+                            </button>
+                        </div>
+                        <div id="sqlMaintLog" class="bg-dark text-info p-3 rounded font-monospace"
                             style="white-space: pre; font-size: 0.7rem; line-height: 1.2;">CREATE TABLE T_UploadLog (
                             ID INT IDENTITY(1,1) PRIMARY KEY,
                             ConfigID INT,

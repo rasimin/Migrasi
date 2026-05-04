@@ -16,7 +16,7 @@ namespace Migrasi
         protected global::System.Web.UI.WebControls.TextBox txtNewDBName;
         protected global::System.Web.UI.WebControls.TextBox txtNewDescription;
 
-        string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+        string connString = ConnectionHelper.GetActiveConnectionString();
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -116,7 +116,11 @@ namespace Migrasi
             }
             catch (Exception ex)
             {
-                ShowMessage("Sync failed (Check permissions to sys.databases): " + ex.Message, "error");
+                string msg = ex.Message;
+                if (msg.Contains("TDatabaseMaster"))
+                    msg = "Table 'TDatabaseMaster' is missing. Please run the SQL Setup script shown on this page first.";
+                
+                ShowMessage("Sync failed: " + msg, "error");
             }
         }
 
@@ -160,7 +164,11 @@ namespace Migrasi
             }
             catch (Exception ex)
             {
-                ShowMessage("Error saving data: " + ex.Message, "error");
+                string msg = ex.Message;
+                if (msg.Contains("TDatabaseMaster"))
+                    msg = "Table 'TDatabaseMaster' is missing. Please run the SQL Setup script shown on this page first.";
+
+                ShowMessage("Error saving data: " + msg, "error");
             }
         }
 

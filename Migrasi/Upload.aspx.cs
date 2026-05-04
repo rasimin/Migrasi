@@ -13,7 +13,7 @@ namespace Migrasi
 {
     public partial class Upload : Page
     {
-        string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+            string connString = ConnectionHelper.GetActiveConnectionString();
 
         protected global::System.Web.UI.WebControls.Panel pnlExecution;
         protected global::System.Web.UI.WebControls.Panel pnlSummary;
@@ -33,15 +33,26 @@ namespace Migrasi
 
         private void FillConfigDropdown()
         {
-            using (SqlConnection conn = new SqlConnection(connString))
+            try
             {
-                string query = "SELECT FileGenerate, NamaSPUpload FROM T_MaintenanceGenerate WHERE NamaSPUpload IS NOT NULL AND NamaSPUpload <> '' ORDER BY FileGenerate";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (SqlConnection conn = new SqlConnection(connString))
                 {
-                    conn.Open();
-                    ddlConfig.DataSource = cmd.ExecuteReader();
-                    ddlConfig.DataBind();
-                    ddlConfig.Items.Insert(0, new ListItem("-- Select Upload Config --", ""));
+                    string query = "SELECT FileGenerate, NamaSPUpload FROM T_MaintenanceGenerate WHERE NamaSPUpload IS NOT NULL AND NamaSPUpload <> '' ORDER BY FileGenerate";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        conn.Open();
+                        ddlConfig.DataSource = cmd.ExecuteReader();
+                        ddlConfig.DataBind();
+                        ddlConfig.Items.Insert(0, new ListItem("-- Select Upload Config --", ""));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ddlConfig.Items.Insert(0, new ListItem("-- Error Loading Config --", ""));
+                if (ex.Message.Contains("T_MaintenanceGenerate"))
+                {
+                    ScriptManager.RegisterStartupScript(this, GetType(), "alert", "showAlert('Setup Required', 'Table T_MaintenanceGenerate is missing. Please run the SQL Setup script on the Maintenance page.', 'warning');", true);
                 }
             }
         }
@@ -169,7 +180,7 @@ namespace Migrasi
 
                 // Fetch Custom Mapping if exists
                 Dictionary<string, string> mappings = new Dictionary<string, string>();
-                using (SqlConnection connMap = new SqlConnection(ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString))
+                using (SqlConnection connMap = new SqlConnection(ConnectionHelper.GetActiveConnectionString()))
                 {
                     string queryMap = "SELECT SourceColumn, TargetParameter FROM T_MappingDetail WHERE ConfigID = @CID";
                     using (SqlCommand cmdMap = new SqlCommand(queryMap, connMap))

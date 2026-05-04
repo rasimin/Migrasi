@@ -408,6 +408,7 @@
                             </a>
                             <ul class="dropdown-menu border-0 shadow-sm rounded-3" aria-labelledby="configDropdown">
                                 <li><a class="dropdown-item py-2" runat="server" href="~/DatabaseMaster"><i class="bi bi-server me-2 text-warning"></i>DB Master</a></li>
+                                <li><a class="dropdown-item py-2" runat="server" href="~/Connections"><i class="bi bi-database-fill-gear me-2 text-primary"></i>Connection Manager</a></li>
                                 <li><a class="dropdown-item py-2" runat="server" href="~/Maintenance"><i class="bi bi-gear-fill me-2 text-secondary"></i>Config Center</a></li>
                                 <li><a class="dropdown-item py-2" runat="server" href="~/Mapping"><i class="bi bi-intersect me-2 text-success"></i>Mapping Center</a></li>
                             </ul>
@@ -447,5 +448,26 @@
     </form>
     <asp:PlaceHolder runat="server">
     </asp:PlaceHolder>
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.innerText || element.value;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // Show a small toast or alert
+                Swal.fire({
+                    title: 'Copied!',
+                    text: 'Script copied to clipboard',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+    </script>
 </body>
 </html>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using System.Linq;
 using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
@@ -21,7 +22,7 @@ namespace Migrasi
         protected global::System.Web.UI.WebControls.TextBox txtTimeout;
         protected global::System.Web.UI.WebControls.TextBox txtMaxRows;
 
-        string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+        string connString = ConnectionHelper.GetActiveConnectionString();
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -51,15 +52,30 @@ namespace Migrasi
                         }
                     }
                     
-                    // Set dropdown ke database bawaan dari connection string
-                    string defaultDb = conn.Database;
-                    if (ddlDatabase.Items.FindByValue(defaultDb) != null)
+                    // Set dropdown ke database bawaan dari profile yang aktif
+                    var activeProfile = ConnectionHelper.GetActiveProfile();
+                    string defaultDb = activeProfile != null ? activeProfile.Database : conn.Database;
+                    
+                    // Cari secara case-insensitive agar lebih aman
+                    ListItem item = ddlDatabase.Items.FindByValue(defaultDb);
+                    if (item == null) {
+                        // Coba cari manual jika FindByValue gagal (mungkin masalah casing)
+                        foreach (ListItem li in ddlDatabase.Items) {
+                            if (li.Value.Equals(defaultDb, StringComparison.OrdinalIgnoreCase)) {
+                                item = li;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (item != null)
                     {
-                        ddlDatabase.SelectedValue = defaultDb;
+                        ddlDatabase.ClearSelection();
+                        item.Selected = true;
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Fallback: Jika user tidak punya izin (VIEW ANY DATABASE) untuk membaca sys.databases,
                 // tangkap errornya diam-diam dan cukup tampilkan 1 database bawaan dari connection string.

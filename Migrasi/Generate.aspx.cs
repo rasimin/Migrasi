@@ -12,8 +12,17 @@ using System.Text;
 
 namespace Migrasi
 {
+    public class PagerItem
+    {
+        public string Text { get; set; }
+        public string Value { get; set; }
+        public bool IsActive { get; set; }
+    }
+
     public partial class Generate : Page
     {
+        string connString = ConnectionHelper.GetActiveConnectionString();
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -24,16 +33,26 @@ namespace Migrasi
 
         private void FillConfigDropdown()
         {
-            string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
-            using (SqlConnection conn = new SqlConnection(connString))
+            try
             {
-                string query = "SELECT ID, FileGenerate FROM T_MaintenanceGenerate ORDER BY FileGenerate";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (SqlConnection conn = new SqlConnection(connString))
                 {
-                    conn.Open();
-                    ddlConfig.DataSource = cmd.ExecuteReader();
-                    ddlConfig.DataBind();
-                    ddlConfig.Items.Insert(0, new ListItem("-- Select Configuration --", ""));
+                    string query = "SELECT ID, FileGenerate FROM T_MaintenanceGenerate ORDER BY FileGenerate";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        conn.Open();
+                        ddlConfig.DataSource = cmd.ExecuteReader();
+                        ddlConfig.DataBind();
+                        ddlConfig.Items.Insert(0, new ListItem("-- Select Configuration --", ""));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ddlConfig.Items.Insert(0, new ListItem("-- Error Loading Config --", ""));
+                if (ex.Message.Contains("T_MaintenanceGenerate"))
+                {
+                    ClientScript.RegisterStartupScript(this.GetType(), "alert", "showAlert('Setup Required', 'Table T_MaintenanceGenerate is missing. Please run the SQL Setup script first.', 'warning');", true);
                 }
             }
         }
@@ -68,16 +87,47 @@ namespace Migrasi
 
                 // Set Up Custom Pager
                 int pageCount = gvProducts.PageCount;
+                int currentPage = gvProducts.PageIndex;
+
                 if (pageCount > 1)
                 {
-                    List<int> pages = Enumerable.Range(1, pageCount).ToList();
+                    List<PagerItem> pages = new List<PagerItem>();
+                    
+                    // Always show 5 pages around current page if possible
+                    int start = Math.Max(0, currentPage - 2);
+                    int end = Math.Min(pageCount - 1, start + 4);
+                    
+                    // Adjust start if end is at the limit
+                    if (end == pageCount - 1) start = Math.Max(0, end - 4);
+
+                    for (int i = start; i <= end; i++)
+                    {
+                        pages.Add(new PagerItem { 
+                            Text = (i + 1).ToString(), 
+                            Value = (i + 1).ToString(), 
+                            IsActive = (i == currentPage) 
+                        });
+                    }
+                    
                     rptPager.DataSource = pages;
                     rptPager.DataBind();
+
+                    // Update Navigation Buttons
+                    btnFirst.Enabled = currentPage > 0;
+                    btnPrev.Enabled = currentPage > 0;
+                    btnNext.Enabled = currentPage < pageCount - 1;
+                    btnLast.Enabled = currentPage < pageCount - 1;
+
+                    btnFirst.CssClass = "btn-page shadow-sm" + (currentPage == 0 ? " opacity-25" : "");
+                    btnPrev.CssClass = "btn-page shadow-sm" + (currentPage == 0 ? " opacity-25" : "");
+                    btnNext.CssClass = "btn-page shadow-sm" + (currentPage == pageCount - 1 ? " opacity-25" : "");
+                    btnLast.CssClass = "btn-page shadow-sm" + (currentPage == pageCount - 1 ? " opacity-25" : "");
                 }
                 else
                 {
                     rptPager.DataSource = null;
                     rptPager.DataBind();
+                    btnFirst.Visible = btnPrev.Visible = btnNext.Visible = btnLast.Visible = false;
                 }
             }
         }
@@ -89,6 +139,22 @@ namespace Migrasi
             BindGrid();
         }
 
+        protected void Pager_Click(object sender, EventArgs e)
+        {
+            LinkButton btn = (LinkButton)sender;
+            string arg = btn.CommandArgument;
+            int pageCount = gvProducts.PageCount;
+
+            switch (arg)
+            {
+                case "First": gvProducts.PageIndex = 0; break;
+                case "Prev": gvProducts.PageIndex = Math.Max(0, gvProducts.PageIndex - 1); break;
+                case "Next": gvProducts.PageIndex = Math.Min(pageCount - 1, gvProducts.PageIndex + 1); break;
+                case "Last": gvProducts.PageIndex = pageCount - 1; break;
+            }
+            BindGrid();
+        }
+
         private DataTable GetData()
         {
             string configIdStr = ddlConfig.SelectedValue;
@@ -97,7 +163,7 @@ namespace Migrasi
             int configId = 0;
             if (!int.TryParse(configIdStr, out configId)) return null;
 
-            string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+            string connString = ConnectionHelper.GetActiveConnectionString();
             
             // Fetch configuration details dynamically
             string targetDb = "";

@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Configuration;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using System.Linq;
 
 namespace Migrasi
 {
@@ -15,7 +16,7 @@ namespace Migrasi
         protected global::System.Web.UI.WebControls.LinkButton btnSearch;
         protected global::System.Web.UI.WebControls.GridView gvResults;
 
-        string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+        string connString = ConnectionHelper.GetActiveConnectionString();
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -43,10 +44,25 @@ namespace Migrasi
                             ddlDatabase.DataBind();
                         }
                     }
-                    string defaultDb = conn.Database;
-                    if (ddlDatabase.Items.FindByValue(defaultDb) != null)
+                    // Set dropdown ke database bawaan dari profile yang aktif
+                    var activeProfile = ConnectionHelper.GetActiveProfile();
+                    string defaultDb = activeProfile != null ? activeProfile.Database : conn.Database;
+
+                    // Cari secara case-insensitive agar lebih aman
+                    ListItem item = ddlDatabase.Items.FindByValue(defaultDb);
+                    if (item == null) {
+                        foreach (ListItem li in ddlDatabase.Items) {
+                            if (li.Value.Equals(defaultDb, StringComparison.OrdinalIgnoreCase)) {
+                                item = li;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (item != null)
                     {
-                        ddlDatabase.SelectedValue = defaultDb;
+                        ddlDatabase.ClearSelection();
+                        item.Selected = true;
                     }
                 }
             }

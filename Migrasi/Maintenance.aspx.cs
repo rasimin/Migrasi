@@ -12,7 +12,7 @@ namespace Migrasi
 {
     public partial class Maintenance : Page
     {
-        string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+            string connString = ConnectionHelper.GetActiveConnectionString();
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -64,18 +64,43 @@ namespace Migrasi
 
         private void BindGrid()
         {
-            using (SqlConnection conn = new SqlConnection(connString))
+            try
             {
-                string query = "SELECT * FROM T_MaintenanceGenerate ORDER BY CreatedAt DESC";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (SqlConnection conn = new SqlConnection(connString))
                 {
-                    using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
+                    string query = "SELECT * FROM T_MaintenanceGenerate";
+                    // Cek apakah kolom CreatedAt ada sebelum melakukan sorting
+                    using (SqlCommand checkCmd = new SqlCommand("IF COL_LENGTH('T_MaintenanceGenerate', 'CreatedAt') IS NOT NULL SELECT 1 ELSE SELECT 0", conn))
                     {
-                        DataTable dt = new DataTable();
-                        sda.Fill(dt);
-                        gvMaintenance.DataSource = dt;
-                        gvMaintenance.DataBind();
+                        conn.Open();
+                        bool hasCreatedAt = (int)checkCmd.ExecuteScalar() == 1;
+                        if (hasCreatedAt) query += " ORDER BY CreatedAt DESC";
                     }
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
+                        {
+                            DataTable dt = new DataTable();
+                            sda.Fill(dt);
+
+                            // Tambahkan kolom CreatedAt bayangan jika belum ada di database
+                            // agar GridView tidak error saat binding.
+                            if (!dt.Columns.Contains("CreatedAt"))
+                            {
+                                dt.Columns.Add("CreatedAt", typeof(DateTime));
+                            }
+
+                            gvMaintenance.DataSource = dt;
+                            gvMaintenance.DataBind();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("T_MaintenanceGenerate"))
+                {
+                    ScriptManager.RegisterStartupScript(this, GetType(), "alert", "showAlert('Setup Required', 'Table T_MaintenanceGenerate is missing. Please run the SQL Setup script first.', 'warning');", true);
                 }
             }
         }
@@ -216,7 +241,7 @@ namespace Migrasi
         [System.Web.Services.WebMethod]
         public static bool ExecuteSPScript(string script, string targetDb)
         {
-            string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+                string connString = ConnectionHelper.GetActiveConnectionString();
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 try
@@ -240,7 +265,7 @@ namespace Migrasi
         [System.Web.Services.WebMethod]
         public static object CreateSPFromColumns(string spName, string targetDb, string columns)
         {
-            string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+                string connString = ConnectionHelper.GetActiveConnectionString();
             try
             {
                 string[] cols = columns.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -278,7 +303,7 @@ namespace Migrasi
         [System.Web.Services.WebMethod]
         public static object CreateSPAndUpdateConfig(string spName, string targetDb, string columns, int configId)
         {
-            string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+                string connString = ConnectionHelper.GetActiveConnectionString();
             try
             {
                 string[] cols = columns.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -333,7 +358,7 @@ namespace Migrasi
         [System.Web.Services.WebMethod]
         public static bool CheckSPExists(string spName, string targetDb)
         {
-            string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+                string connString = ConnectionHelper.GetActiveConnectionString();
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 try
@@ -358,7 +383,7 @@ namespace Migrasi
             List<ParameterInfo> list = new List<ParameterInfo>();
             if (string.IsNullOrEmpty(spName)) return list;
 
-            string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+                string connString = ConnectionHelper.GetActiveConnectionString();
 
             try
             {
@@ -438,7 +463,7 @@ namespace Migrasi
         [System.Web.Services.WebMethod]
         public static bool SaveMapping(int configId, List<MappingEntry> mappings)
         {
-            string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+                string connString = ConnectionHelper.GetActiveConnectionString();
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 conn.Open();
@@ -492,7 +517,7 @@ namespace Migrasi
         [System.Web.Services.WebMethod]
         public static object QuickGenerateSP(string query, string targetDb, string spName)
         {
-            string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+                string connString = ConnectionHelper.GetActiveConnectionString();
             try
             {
                 using (SqlConnection conn = new SqlConnection(connString))
@@ -547,7 +572,7 @@ namespace Migrasi
         [System.Web.Services.WebMethod]
         public static object ExecuteAndSyncSP(string script, string spName, string targetDb, int configId, bool downloadOnly)
         {
-            string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+                string connString = ConnectionHelper.GetActiveConnectionString();
             try
             {
                 using (SqlConnection conn = new SqlConnection(connString))

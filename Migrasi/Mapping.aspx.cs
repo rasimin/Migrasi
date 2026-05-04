@@ -18,7 +18,7 @@ namespace Migrasi
         protected global::System.Web.UI.WebControls.TextBox txtFromCode;
         protected global::System.Web.UI.WebControls.TextBox txtToCode;
 
-        string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
+        string connString = ConnectionHelper.GetActiveConnectionString();
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -30,14 +30,24 @@ namespace Migrasi
 
         private void LoadData()
         {
-            using (SqlConnection conn = new SqlConnection(connString))
+            try
             {
-                string query = "SELECT * FROM TMappingPadanan ORDER BY MappingKey, FromCode";
-                SqlDataAdapter sda = new SqlDataAdapter(query, conn);
-                DataTable dt = new DataTable();
-                sda.Fill(dt);
-                gvMapping.DataSource = dt;
-                gvMapping.DataBind();
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    string query = "SELECT * FROM TMappingPadanan ORDER BY MappingKey, FromCode";
+                    SqlDataAdapter sda = new SqlDataAdapter(query, conn);
+                    DataTable dt = new DataTable();
+                    sda.Fill(dt);
+                    gvMapping.DataSource = dt;
+                    gvMapping.DataBind();
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("TMappingPadanan"))
+                {
+                    ShowAlert("Setup Required", "Table TMappingPadanan is missing. Please run the SQL Setup script on this page.", "warning");
+                }
             }
         }
 
@@ -87,7 +97,11 @@ namespace Migrasi
             }
             catch (Exception ex)
             {
-                ShowAlert("Error", ex.Message, "error");
+                string msg = ex.Message;
+                if (msg.Contains("TMappingPadanan"))
+                    msg = "Table 'TMappingPadanan' is missing. Please run the SQL Setup script first.";
+
+                ShowAlert("Error", msg, "error");
             }
         }
 

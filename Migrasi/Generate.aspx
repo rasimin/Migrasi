@@ -32,17 +32,25 @@
                                 <PagerSettings Visible="false" />
                             </asp:GridView>
                         </div>
-                        <div class="custom-pagination py-3 d-flex justify-content-center">
-                            <asp:Repeater ID="rptPager" runat="server" OnItemCommand="rptPager_ItemCommand">
-                                <ItemTemplate>
-                                    <asp:LinkButton ID="lnkPage" runat="server" 
-                                        Text='<%# Container.DataItem %>' 
-                                        CommandArgument='<%# Container.DataItem %>' 
-                                        CssClass='<%# (int)Container.DataItem - 1 == gvProducts.PageIndex ? "active-page" : "" %>'
-                                        Enabled='<%# (int)Container.DataItem - 1 != gvProducts.PageIndex %>'>
-                                    </asp:LinkButton>
-                                </ItemTemplate>
-                            </asp:Repeater>
+                        <div class="custom-pagination py-4 d-flex justify-content-center align-items-center gap-1">
+                            <asp:LinkButton ID="btnFirst" runat="server" CssClass="btn-page shadow-sm" OnClick="Pager_Click" CommandArgument="First" ToolTip="First Page"><i class="bi bi-chevron-double-left"></i></asp:LinkButton>
+                            <asp:LinkButton ID="btnPrev" runat="server" CssClass="btn-page shadow-sm" OnClick="Pager_Click" CommandArgument="Prev" ToolTip="Previous Page"><i class="bi bi-chevron-left"></i></asp:LinkButton>
+                            
+                            <div class="d-flex gap-1 mx-2 overflow-auto no-scrollbar" style="max-width: 60vw;">
+                                <asp:Repeater ID="rptPager" runat="server" OnItemCommand="rptPager_ItemCommand">
+                                    <ItemTemplate>
+                                        <asp:LinkButton ID="lnkPage" runat="server" 
+                                            Text='<%# Eval("Text") %>' 
+                                            CommandArgument='<%# Eval("Value") %>' 
+                                            CssClass='<%# (bool)Eval("IsActive") ? "btn-page active-page shadow-sm" : "btn-page shadow-sm" %>'
+                                            Enabled='<%# !(bool)Eval("IsActive") %>'>
+                                        </asp:LinkButton>
+                                    </ItemTemplate>
+                                </asp:Repeater>
+                            </div>
+
+                            <asp:LinkButton ID="btnNext" runat="server" CssClass="btn-page shadow-sm" OnClick="Pager_Click" CommandArgument="Next" ToolTip="Next Page"><i class="bi bi-chevron-right"></i></asp:LinkButton>
+                            <asp:LinkButton ID="btnLast" runat="server" CssClass="btn-page shadow-sm" OnClick="Pager_Click" CommandArgument="Last" ToolTip="Last Page"><i class="bi bi-chevron-double-right"></i></asp:LinkButton>
                         </div>
                     </div>
                 </div>
@@ -51,27 +59,46 @@
     </main>
 
     <style>
-        .custom-pagination a {
-            display: block;
-            padding: 6px 12px;
+        .custom-pagination .btn-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            width: 38px;
+            height: 38px;
             text-decoration: none;
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
-            color: var(--primary-blue);
-            border-radius: 4px;
-            margin: 0 3px;
-            font-size: 14px;
-            min-width: 35px;
-            text-align: center;
+            color: var(--text-main);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
         }
         .custom-pagination .active-page {
             background-color: var(--primary-blue) !important;
             color: #fff !important;
             border-color: var(--primary-blue) !important;
-            cursor: default;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3) !important;
         }
-        .custom-pagination a:hover:not(.active-page) {
+        .custom-pagination .btn-page:hover:not(.active-page):not(:disabled) {
             background-color: var(--table-header);
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+        .custom-pagination .btn-page:disabled, 
+        .custom-pagination .btn-page[enabled="false"] {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 </asp:Content>
