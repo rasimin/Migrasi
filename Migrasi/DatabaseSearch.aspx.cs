@@ -140,7 +140,6 @@ namespace Migrasi
                     }
                 }
             }
-            conn.Close();
         }
 
         protected void gvResults_RowCommand(object sender, GridViewCommandEventArgs e)
