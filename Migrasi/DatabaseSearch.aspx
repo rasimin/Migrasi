@@ -10,9 +10,27 @@
                             <h4 class="mb-1 fw-bold text-dark"><i class="bi bi-search me-2 text-primary"></i>Database Object Search</h4>
                             <p class="text-secondary small mb-0">Search for tables or SPs containing specific text in their definition</p>
                         </div>
-                        <div class="d-flex gap-2">
-                             <asp:TextBox ID="txtSearch" runat="server" CssClass="form-control" placeholder="Enter table or SP name..." style="min-width: 300px;"></asp:TextBox>
-                             <asp:LinkButton ID="btnSearch" runat="server" CssClass="btn btn-primary btn-modern px-4" OnClick="btnSearch_Click">
+                        <div class="d-flex gap-2 align-items-end">
+                             <div class="d-flex flex-column">
+                                 <label class="small text-secondary fw-bold mb-1 ms-1" style="font-size: 0.7rem;">DATABASE</label>
+                                 <div class="input-group shadow-sm" style="width: auto;">
+                                     <span class="input-group-text px-2" style="background-color: var(--bg-body); border-color: var(--border-color); color: var(--text-main);">
+                                         <i class="bi bi-database text-primary"></i>
+                                     </span>
+                                     <asp:DropDownList ID="ddlDatabase" runat="server" CssClass="form-select py-2 fw-bold" 
+                                         style="min-width: 200px; background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-main) !important;">
+                                     </asp:DropDownList>
+                                 </div>
+                             </div>
+                             <div class="d-flex flex-column">
+                                 <label class="small text-secondary fw-bold mb-1 ms-1" style="font-size: 0.7rem;">SEARCH KEYWORD</label>
+                                 <asp:TextBox ID="txtSearch" runat="server" CssClass="form-control py-2 shadow-sm" 
+                                     placeholder="Table or SP name..." style="min-width: 300px;" 
+                                     onkeypress="if(event.keyCode==13){document.getElementById('btnSearch').click(); return false;}"></asp:TextBox>
+                             </div>
+                             <asp:LinkButton ID="btnSearch" runat="server" CssClass="btn btn-primary btn-modern px-4 py-2 shadow-sm mb-0" 
+                                 style="height: 42px; display: flex; align-items: center;"
+                                 OnClick="btnSearch_Click" ClientIDMode="Static">
                                  <i class="bi bi-search me-1"></i> Search
                              </asp:LinkButton>
                         </div>

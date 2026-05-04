@@ -93,7 +93,7 @@
                         </div>
 
                         <!-- Card: SP Maker -->
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <a href="SPGenerator" class="text-decoration-none h-100">
                                 <div class="card card-modern h-100 p-3 transition-transform">
                                     <div class="card-body">
@@ -104,8 +104,20 @@
                                 </div>
                             </a>
                         </div>
+                        <!-- Card: Object Search -->
+                        <div class="col-md-4">
+                            <a href="DatabaseSearch" class="text-decoration-none h-100">
+                                <div class="card card-modern h-100 p-3 transition-transform">
+                                    <div class="card-body">
+                                        <div class="h2 mb-3 text-primary opacity-75"><i class="bi bi-search"></i></div>
+                                        <h5 class="fw-bold text-dark">Object Search</h5>
+                                        <p class="small text-secondary mb-0">Cari tabel atau SP berdasarkan nama atau isi script definisinya.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
                         <!-- Card: Query Runner -->
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <a href="Query" class="text-decoration-none h-100">
                                 <div class="card card-modern h-100 p-3 transition-transform">
                                     <div class="card-body">

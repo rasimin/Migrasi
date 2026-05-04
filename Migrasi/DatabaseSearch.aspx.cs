@@ -10,6 +10,7 @@ namespace Migrasi
 {
     public partial class DatabaseSearch : Page
     {
+        protected global::System.Web.UI.WebControls.DropDownList ddlDatabase;
         protected global::System.Web.UI.WebControls.TextBox txtSearch;
         protected global::System.Web.UI.WebControls.LinkButton btnSearch;
         protected global::System.Web.UI.WebControls.GridView gvResults;
@@ -18,6 +19,52 @@ namespace Migrasi
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!IsPostBack)
+            {
+                LoadDatabases();
+            }
+        }
+
+        private void LoadDatabases()
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    string query = "SELECT name FROM sys.databases WHERE state_desc = 'ONLINE' ORDER BY name";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        conn.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            ddlDatabase.DataSource = reader;
+                            ddlDatabase.DataTextField = "name";
+                            ddlDatabase.DataValueField = "name";
+                            ddlDatabase.DataBind();
+                        }
+                    }
+                    string defaultDb = conn.Database;
+                    if (ddlDatabase.Items.FindByValue(defaultDb) != null)
+                    {
+                        ddlDatabase.SelectedValue = defaultDb;
+                    }
+                }
+            }
+            catch
+            {
+                try
+                {
+                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connString);
+                    string defaultDb = builder.InitialCatalog;
+                    ddlDatabase.Items.Clear();
+                    if (!string.IsNullOrEmpty(defaultDb))
+                    {
+                        ddlDatabase.Items.Add(new ListItem(defaultDb, defaultDb));
+                        ddlDatabase.SelectedValue = defaultDb;
+                    }
+                }
+                catch { }
+            }
         }
 
         protected void btnSearch_Click(object sender, EventArgs e)
@@ -34,14 +81,21 @@ namespace Migrasi
             {
                 try
                 {
-                    // Check if procedure exists, if not create it temporarily or use inline SQL
-                    EnsureProcedureExists(conn);
-
-                    using (SqlCommand cmd = new SqlCommand("_FindTableOrSP", conn))
+                    // Ganti fokus database sesuai pilihan
+                    string selectedDb = ddlDatabase.SelectedValue;
+                    conn.Open();
+                    if (!string.IsNullOrEmpty(selectedDb) && !selectedDb.Equals(conn.Database, StringComparison.OrdinalIgnoreCase))
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@TableOrSPName", term);
-                        conn.Open();
+                        conn.ChangeDatabase(selectedDb);
+                    }
+
+                    // Check if procedure exists in the selected database
+                    EnsureProcedureExists(conn);
+ 
+                     using (SqlCommand cmd = new SqlCommand("_FindTableOrSP", conn))
+                     {
+                         cmd.CommandType = CommandType.StoredProcedure;
+                         cmd.Parameters.AddWithValue("@TableOrSPName", term);
 
                         SqlDataAdapter sda = new SqlDataAdapter(cmd);
                         DataTable dt = new DataTable();
@@ -108,12 +162,18 @@ namespace Migrasi
             {
                 try
                 {
+                    string selectedDb = ddlDatabase.SelectedValue;
+                    conn.Open();
+                    if (!string.IsNullOrEmpty(selectedDb) && !selectedDb.Equals(conn.Database, StringComparison.OrdinalIgnoreCase))
+                    {
+                        conn.ChangeDatabase(selectedDb);
+                    }
+
                     // Using sys.sql_modules for complete script retrieval
                     string sql = "SELECT definition FROM sys.sql_modules WHERE object_id = OBJECT_ID(@Name)";
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
                     {
                         cmd.Parameters.AddWithValue("@Name", objectName);
-                        conn.Open();
                         object result = cmd.ExecuteScalar();
                         
                         if (result != null && result != DBNull.Value)

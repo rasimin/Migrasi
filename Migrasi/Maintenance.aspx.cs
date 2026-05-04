@@ -545,7 +545,7 @@ namespace Migrasi
         }
 
         [System.Web.Services.WebMethod]
-        public static object ExecuteAndSyncSP(string script, string spName, string targetDb, int configId)
+        public static object ExecuteAndSyncSP(string script, string spName, string targetDb, int configId, bool downloadOnly)
         {
             string connString = ConfigurationManager.ConnectionStrings["SimulasiDB"].ConnectionString;
             try
@@ -554,13 +554,15 @@ namespace Migrasi
                 {
                     conn.Open();
 
-                    // 1. Create SP in target DB
-                    if (!string.IsNullOrEmpty(targetDb) && targetDb != "(Default DB)") conn.ChangeDatabase(targetDb);
-                    
-                    // Split script by GO if exists, or just execute as one
-                    using (SqlCommand cmd = new SqlCommand(script, conn))
+                    // 1. Create SP in target DB (Only if NOT downloadOnly)
+                    if (!downloadOnly)
                     {
-                        cmd.ExecuteNonQuery();
+                        if (!string.IsNullOrEmpty(targetDb) && targetDb != "(Default DB)") conn.ChangeDatabase(targetDb);
+
+                        using (SqlCommand cmd = new SqlCommand(script, conn))
+                        {
+                            cmd.ExecuteNonQuery();
+                        }
                     }
 
                     // 2. Sync back to Maintenance Table (Config DB)

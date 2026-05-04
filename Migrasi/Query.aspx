@@ -10,18 +10,45 @@
                             <h4 class="mb-1 fw-bold text-dark"><i class="bi bi-terminal me-2 text-primary"></i>Query Runner</h4>
                             <p class="text-secondary small mb-0">Execute SQL commands directly against the database</p>
                         </div>
-                        <div class="d-flex gap-3 align-items-center">
-                            <div class="input-group shadow-sm" style="width: auto;">
-                                <span class="input-group-text" style="background-color: var(--bg-body); border-color: var(--border-color); color: var(--text-main);">
-                                    <i class="bi bi-database text-primary"></i>
-                                </span>
-                                <asp:DropDownList ID="ddlDatabase" runat="server" CssClass="form-select py-2 fw-bold" 
-                                    style="min-width: 250px; background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-main) !important;">
-                                </asp:DropDownList>
-                            </div>
-                            <asp:LinkButton ID="btnExecute" runat="server" CssClass="btn btn-primary btn-modern px-4 py-2 shadow-sm" OnClick="btnExecute_Click" OnClientClick="showLoading();">
-                                <i class="bi bi-play-fill me-1"></i> Execute Query
-                            </asp:LinkButton>
+                        <div class="d-flex gap-2 align-items-end">
+                             <div class="d-flex flex-column">
+                                 <label class="small text-secondary fw-bold mb-1 ms-1" style="font-size: 0.7rem;">TIMEOUT (S)</label>
+                                 <div class="input-group shadow-sm" style="width: 100px;">
+                                     <span class="input-group-text px-2" style="background-color: var(--bg-body); border-color: var(--border-color); color: var(--text-muted);">
+                                         <i class="bi bi-clock"></i>
+                                     </span>
+                                     <asp:TextBox ID="txtTimeout" runat="server" CssClass="form-control text-center py-2 fw-bold" 
+                                         style="background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-main);" 
+                                         Text="120"></asp:TextBox>
+                                 </div>
+                             </div>
+                             <div class="d-flex flex-column">
+                                 <label class="small text-secondary fw-bold mb-1 ms-1" style="font-size: 0.7rem;">MAX ROWS</label>
+                                 <div class="input-group shadow-sm" style="width: 120px;">
+                                     <span class="input-group-text px-2" style="background-color: var(--bg-body); border-color: var(--border-color); color: var(--text-muted);">
+                                         <i class="bi bi-list-ol"></i>
+                                     </span>
+                                     <asp:TextBox ID="txtMaxRows" runat="server" CssClass="form-control text-center py-2 fw-bold" 
+                                         style="background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-main);" 
+                                         Text="1000"></asp:TextBox>
+                                 </div>
+                             </div>
+                             <div class="d-flex flex-column">
+                                 <label class="small text-secondary fw-bold mb-1 ms-1" style="font-size: 0.7rem;">DATABASE</label>
+                                 <div class="input-group shadow-sm" style="width: auto;">
+                                     <span class="input-group-text px-2" style="background-color: var(--bg-body); border-color: var(--border-color); color: var(--text-main);">
+                                         <i class="bi bi-database text-primary"></i>
+                                     </span>
+                                     <asp:DropDownList ID="ddlDatabase" runat="server" CssClass="form-select py-2 fw-bold" 
+                                         style="min-width: 220px; background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-main) !important;">
+                                     </asp:DropDownList>
+                                 </div>
+                             </div>
+                             <asp:LinkButton ID="btnExecute" runat="server" CssClass="btn btn-primary btn-modern px-4 py-2 shadow-sm mb-0" 
+                                 style="height: 42px; display: flex; align-items: center;"
+                                 OnClick="btnExecute_Click" OnClientClick="showLoading();">
+                                 <i class="bi bi-play-fill me-1"></i> Execute
+                             </asp:LinkButton>
                         </div>
                     </div>
                     
